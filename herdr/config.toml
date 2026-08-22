@@ -1,0 +1,338 @@
+# Herdr configuration
+# Managed in C:\Repositorys\dotfiles and loaded via the HERDR_CONFIG_PATH
+# environment variable. Full reference: https://herdr.dev/docs/config-reference/
+#
+# Active values differ from Herdr's defaults. Default or unset values remain
+# commented so this file also serves as a complete configuration reference.
+
+# Show first-run setup on startup. Missing or true shows onboarding.
+# Default: unset.
+onboarding = false
+
+# -----------------------------------------------------------------------------
+# Theme
+# -----------------------------------------------------------------------------
+
+[theme]
+# Built-in theme name. Available themes include catppuccin, terminal,
+# tokyo-night, dracula, nord, gruvbox, one-dark, solarized, kanagawa,
+# rose-pine, and vesper.
+# Default: "catppuccin".
+name = "catppuccin"
+
+# Follow the host terminal's light/dark appearance and switch themes.
+# Default: false.
+auto_switch = false
+
+[theme.custom]
+# Token overrides below use Catppuccin **Mocha**, matching wezterm.lua in this
+# same repo, so Herdr and the terminal hosting it share one palette. Herdr's
+# bundled catppuccin theme is Macchiato, which is a shade lighter and reads as
+# a mismatch when nested inside a Mocha terminal.
+
+# Highlight and selection accent. Green here to match the active tab colour
+# in wezterm.lua.
+accent = "#a6e3a1"
+# Sidebar and panel background. Mocha base.
+panel_bg = "#1e1e2e"
+# Desktop sidebar background, independent of other panel surfaces.
+# sidebar_bg = "#181825"
+# NOTE: active_row_bg and selection_bg appear in Herdr's published config
+# reference but are rejected by 0.8.0-preview.2026-08-04. Left out until the
+# installed build accepts them; verify with `herdr config check`.
+# Lowest elevated surface color.
+surface0 = "#313244"
+# Higher elevated surface color.
+surface1 = "#45475a"
+# Dimmed surface color.
+surface_dim = "#181825"
+# Lowest overlay color.
+overlay0 = "#6c7086"
+# Higher overlay color.
+overlay1 = "#7f849c"
+# Primary foreground text.
+text = "#cdd6f4"
+# Secondary foreground text.
+subtext0 = "#a6adc8"
+# Semantic colors.
+mauve = "#cba6f7"
+green = "#a6e3a1"
+yellow = "#f9e2af"
+red = "#f38ba8"
+blue = "#89b4fa"
+teal = "#94e2d5"
+peach = "#fab387"
+
+# -----------------------------------------------------------------------------
+# Terminal
+# -----------------------------------------------------------------------------
+
+[terminal]
+# Executable used for new interactive panes. Empty uses $SHELL, then /bin/sh.
+# Windows: PowerShell 5.1 ships with the OS. If PowerShell 7 is installed
+# later, change this to "pwsh.exe".
+# Default: "".
+default_shell = "powershell.exe"
+
+# New-shell startup mode: "auto", "login", or "non_login". Auto uses login
+# shells on macOS and non-login behavior elsewhere, which is correct here.
+# Default: "auto".
+# shell_mode = "auto"
+
+# CWD policy for new panes, tabs, and workspaces: "follow", "home", "current",
+# or a fixed path.
+# Default: "follow".
+# new_cwd = "follow"
+
+# -----------------------------------------------------------------------------
+# Updates
+# -----------------------------------------------------------------------------
+
+[update]
+# Release channel: "stable" or "preview". Windows defaults to "preview", which
+# matches the currently installed 0.8.0-preview build. Set to "stable" to move
+# onto release builds.
+# Default: "preview" on Windows.
+# channel = "preview"
+
+# Check herdr.dev for new Herdr versions in the background.
+# Default: true.
+# version_check = true
+
+# -----------------------------------------------------------------------------
+# Keybindings
+# -----------------------------------------------------------------------------
+
+[keys]
+# Prefix key used to enter prefix mode.
+#
+# NOTE: deliberately NOT ctrl+a. Herdr runs inside WezTerm, whose leader is
+# ctrl+a (see wezterm.lua). Sharing a prefix would make the inner and outer
+# multiplexer fight over every keystroke.
+# Default: "ctrl+b".
+prefix = "ctrl+semicolon"
+
+# Open keybinding help.
+# Default: "prefix+?".
+# help = "prefix+?"
+
+# Open settings.
+# Default: "prefix+s".
+settings = "prefix+shift+s"
+
+# Create a workspace.
+# Default: "prefix+shift+n".
+# new_workspace = "prefix+shift+n"
+
+# Create a Git worktree from the selected workspace.
+# Default: "prefix+shift+g".
+# new_worktree = "prefix+shift+g"
+
+# Rename the selected workspace.
+# Default: "prefix+shift+w".
+# rename_workspace = "prefix+shift+w"
+
+# Open workspace navigation. An array gives one action multiple shortcuts.
+# Default: "prefix+w".
+workspace_picker = ["prefix+s", "prefix+w"]
+
+# Open the session navigator.
+# Default: "prefix+g".
+# goto = "prefix+g"
+
+# Detach from server/client mode, or exit --no-session mode.
+# Default: "prefix+q".
+detach = ["prefix+d", "prefix+q"]
+
+# Reload config.toml in the running app/server.
+# Default: "prefix+shift+r".
+reload_config = "prefix+r"
+
+# Select the previous / next workspace.
+# Default: unset.
+previous_workspace = "prefix+("
+next_workspace = "prefix+)"
+
+# Focus Agent panel entries by index 1-9.
+# Default: unset.
+focus_agent = "prefix+alt+1..9"
+
+# Create a tab in the active workspace.
+# Default: "prefix+c".
+# new_tab = "prefix+c"
+
+# Rename the active tab.
+# Default: "prefix+shift+t".
+rename_tab = "prefix+comma"
+
+# Enter keyboard copy mode for the focused pane.
+# Default: "prefix+[".
+copy_mode = "prefix+v"
+
+# Splits.
+#
+# These intentionally mirror wezterm.lua's leader bindings (leader+\ and
+# leader+-) so the same two keys split a pane whether or not Herdr is the
+# thing handling it.
+# Defaults: "prefix+v" / "prefix+minus".
+split_vertical = "prefix+backslash"
+split_horizontal = "prefix+minus"
+
+# Close the focused pane.
+# Default: "prefix+x".
+# close_pane = "prefix+x"
+
+# Toggle zoom for the focused pane.
+# Default: "prefix+z".
+zoom = "prefix+m"
+
+# Enter pane resize mode.
+# Default: "prefix+r".
+resize_mode = "prefix+shift+r"
+
+# Toggle sidebar collapse.
+# Default: "prefix+b".
+# toggle_sidebar = "prefix+b"
+
+# Directional pane focus without leaving prefix mode.
+# Defaults: "prefix+h" / "prefix+j" / "prefix+k" / "prefix+l".
+# focus_pane_left = "prefix+h"
+# focus_pane_down = "prefix+j"
+# focus_pane_up = "prefix+k"
+# focus_pane_right = "prefix+l"
+
+# ctrl+h/j/k/l seamless Vim <-> Herdr pane navigation.
+#
+# DISABLED: these are `plugin_action` bindings that require the
+# vim-herdr-navigation plugin to be installed. Uncomment after installing it,
+# otherwise the bindings reference an action that does not exist.
+#
+# [[keys.command]]
+# key = "ctrl+h"
+# type = "plugin_action"
+# command = "vim-herdr-navigation.left"
+# description = "Navigate left (Vim/Herdr)"
+#
+# [[keys.command]]
+# key = "ctrl+j"
+# type = "plugin_action"
+# command = "vim-herdr-navigation.down"
+# description = "Navigate down (Vim/Herdr)"
+#
+# [[keys.command]]
+# key = "ctrl+k"
+# type = "plugin_action"
+# command = "vim-herdr-navigation.up"
+# description = "Navigate up (Vim/Herdr)"
+#
+# [[keys.command]]
+# key = "ctrl+l"
+# type = "plugin_action"
+# command = "vim-herdr-navigation.right"
+# description = "Navigate right (Vim/Herdr)"
+
+# -----------------------------------------------------------------------------
+# UI and sidebar
+# -----------------------------------------------------------------------------
+
+[ui]
+# Default expanded sidebar width in columns; auto-scales for workspace names.
+# Default: 26.
+sidebar_width = 32
+
+# Start Herdr with the sidebar collapsed; takes effect on the next launch.
+# Default: false.
+# sidebar_start_collapsed = false
+
+# Host cursor policy: "auto", "native", or "drawn". Auto uses a drawn cursor
+# on native Windows/WSL, which is what we want here.
+# Default: "auto".
+# host_cursor = "auto"
+
+# Modifier that passes right-click gestures through to pane apps.
+# Default: "".
+right_click_passthrough_modifier = "ctrl"
+
+# Copy text selected by mouse drag.
+# Default: true.
+# copy_on_select = true
+
+# Ask for confirmation before closing a workspace.
+# Default: true.
+confirm_close = false
+
+# Ask for a name before interactively creating a workspace.
+# Default: false.
+prompt_new_workspace_name = true
+
+# Hide the tab row when the workspace has exactly one tab.
+# Default: false.
+# hide_tab_bar_when_single_tab = false
+
+# Accent color for highlights, borders, and navigation UI.
+# Default: "cyan".
+accent = "#a6e3a1"
+
+# Agent sidebar ordering: "spaces" groups by workspace; "priority" creates an
+# attention queue.
+# Default: "spaces".
+agent_panel_sort = "priority"
+
+# Show detected Agent labels in pane borders when no manual label is set.
+# Default: false.
+show_agent_labels_on_pane_borders = false
+
+# NOTE: ui.status_indicators is documented upstream but not recognised by
+# 0.8.0-preview.2026-08-04. Re-add once the installed build supports it.
+
+# -----------------------------------------------------------------------------
+# Notifications
+# -----------------------------------------------------------------------------
+
+[ui.toast]
+# Popup delivery: "off", in-app "herdr", outer-terminal "terminal", or direct
+# OS "system" notifications.
+# Default: "off".
+delivery = "herdr"
+
+# Delay before finished or needs-input Agent notifications. Valid range: 0-3600.
+# Default: 1.
+# delay_seconds = 1
+
+[ui.toast.herdr]
+# In-app toast position: top-left, top-right, bottom-left, or bottom-right.
+# Default: "bottom-right".
+position = "top-right"
+
+# -----------------------------------------------------------------------------
+# Sound
+# -----------------------------------------------------------------------------
+
+[ui.sound]
+# Play sounds when Agents change state in background workspaces.
+# Default: true.
+enabled = false
+
+# -----------------------------------------------------------------------------
+# Advanced
+# -----------------------------------------------------------------------------
+
+[advanced]
+# Maximum scrollback bytes retained per pane terminal. 50 MiB.
+# Default: 10000000.
+scrollback_limit_bytes = 52428800
+
+# -----------------------------------------------------------------------------
+# Experimental
+# -----------------------------------------------------------------------------
+
+[experimental]
+# Render local Kitty graphics for attached clients. WezTerm implements the
+# Kitty graphics protocol, so this works when Herdr runs inside it.
+# Default: false.
+kitty_graphics = true
+
+# Persist recent pane screen history to session-history.json.
+# NOTE: saved output may contain secrets. Disable if that matters to you.
+# Default: false.
+pane_history = true

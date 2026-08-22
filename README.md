@@ -27,6 +27,8 @@ the path WezTerm actually reads, so the file lives here and runs there.
 - ⌨️ **tmux-style leader key** — `Ctrl+a` prefix for splits, panes, and
   workspace navigation.
 - 🔄 **Hot reload** — the config re-applies on save; no restart.
+- 🧩 **Herdr layered on top** — multiplexer and agent panel sharing WezTerm's
+  palette, with keybindings chosen so the two never collide.
 
 ## Quick Start
 
@@ -46,9 +48,14 @@ Open WezTerm. That is the entire setup.
 dotfiles/
 ├── README.md
 ├── .gitignore
+├── herdr/
+│   └── config.toml        # Herdr multiplexer: theme, keys, agent panel
 └── wezterm/
-    └── wezterm.lua        # the whole configuration, one file
+    └── wezterm.lua        # terminal: theme, font, tabs, keybindings
 ```
+
+The two are designed to sit inside one another — Herdr runs in a WezTerm
+window — so they share a palette and avoid colliding on keys.
 
 ## The WezTerm Config
 
@@ -106,6 +113,76 @@ Leader is `Ctrl+a`, pressed before the listed key.
 | `Ctrl` + `=` / `-` / `0` | Font size up / down / reset |
 | `Ctrl`+`Shift` + `R` | Reload config |
 | `F11` | Fullscreen |
+
+## Herdr
+
+[Herdr](https://herdr.dev) is a terminal multiplexer with an agent panel —
+workspaces, tabs, and splits, plus a sidebar tracking the state of any AI
+agents running in panes. It runs *inside* WezTerm, so the two configs are
+written to cooperate rather than fight.
+
+### Loading
+
+Herdr reads a single `config.toml`, and on Windows that lives at
+`%APPDATA%\herdr\`. That directory is **not** junctioned like WezTerm's,
+because Herdr also keeps live runtime state there — sockets, logs,
+`session.json` — none of which belongs in version control.
+
+Instead Herdr's own override is used:
+
+```powershell
+[Environment]::SetEnvironmentVariable(
+  'HERDR_CONFIG_PATH',
+  'C:\Repositorys\dotfiles\herdr\config.toml',
+  'User')
+```
+
+Set once, persists across reboots, needs no admin, and leaves the runtime
+directory alone.
+
+⚠️ If `HERDR_CONFIG_PATH` is ever unset, Herdr silently falls back to
+`%APPDATA%\herdr\config.toml` — which still exists. The terminal keeps
+working, just from the wrong config. Same failure shape as the WezTerm
+precedence trap below.
+
+### What Differs From Upstream
+
+Adapted from [dmmulroy's Herdr config](https://github.com/dmmulroy/.dotfiles),
+with these deliberate changes for this machine:
+
+- **Shell** — `fish` → `powershell.exe`. Change to `pwsh.exe` if PowerShell 7
+  is ever installed.
+- **Palette** — his uses Catppuccin **Macchiato**; Herdr's bundled catppuccin
+  theme is Macchiato too. Overridden to **Mocha** to match `wezterm.lua`,
+  since a Macchiato panel inside a Mocha terminal reads as a mismatch. Accent
+  is green, matching the active tab.
+- **Prefix** — kept at `ctrl+semicolon`, deliberately **not** `ctrl+a`, which
+  is WezTerm's leader. A shared prefix would make the inner and outer
+  multiplexer fight over every keystroke.
+- **Splits** — `prefix+\` and `prefix+-`, mirroring WezTerm's `leader+\` and
+  `leader+-` so the same keys split a pane at either level.
+- **Vim navigation** — his `ctrl+h/j/k/l` bindings are commented out here.
+  They are `plugin_action` bindings requiring the `vim-herdr-navigation`
+  plugin, which is not installed.
+- **Omitted keys** — `theme.custom.active_row_bg`, `theme.custom.selection_bg`,
+  and `ui.status_indicators` are in Herdr's published reference but rejected by
+  the installed `0.8.0-preview.2026-08-04` build. Left out with notes inline.
+
+### Verifying
+
+```powershell
+herdr config check
+```
+
+`config: ok` means the file parses and every key is recognised. It names any
+unknown keys individually, which is the fastest way to spot options that
+have drifted between Herdr versions.
+
+Apply changes to a running instance with `prefix+r`, or:
+
+```powershell
+herdr server reload-config
+```
 
 ## Configuration
 
