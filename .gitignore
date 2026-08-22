@@ -7,3 +7,12 @@ Desktop.ini
 
 # wezterm plugin cache (cloned repos, not ours to track)
 wezterm/plugins/
+
+# neovim: lua_ls offers to write this into the workspace; the same settings
+# are already in nvim/lua/plugins/lsp.lua
+nvim/.luarc.json
+
+# lazy-lock.json is deliberately NOT ignored -- it pins plugin commits
+
+# local agent instructions, not part of the terminal config
+agents.md
