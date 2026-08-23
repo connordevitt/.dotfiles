@@ -95,7 +95,7 @@ return {
     },
   },
 
-  -- Auto-close brackets, treesitter-aware so it does not fire inside strings.
+  -- Treesitter-aware, so it does not fire inside strings.
   {
     'windwp/nvim-autopairs',
     event = 'InsertEnter',

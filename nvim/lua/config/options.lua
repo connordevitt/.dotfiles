@@ -8,7 +8,6 @@ vim.g.maplocalleader = [[\]]
 
 local opt = vim.opt
 
--- Lines & navigation
 opt.number = true
 opt.relativenumber = true -- jump N lines with 5j / 12k
 opt.cursorline = true
@@ -16,7 +15,7 @@ opt.scrolloff = 8 -- keep 8 lines of context above/below
 opt.sidescrolloff = 8
 opt.wrap = false
 
--- Indentation: 2 spaces, expandtab. Overridden per-filetype by editorconfig.
+-- Overridden per-filetype by editorconfig.
 opt.tabstop = 2
 opt.shiftwidth = 2
 opt.softtabstop = 2
@@ -24,7 +23,6 @@ opt.expandtab = true
 opt.smartindent = true
 opt.breakindent = true
 
--- Search
 opt.ignorecase = true
 opt.smartcase = true -- ...unless the pattern has a capital in it
 opt.hlsearch = true
@@ -34,7 +32,6 @@ opt.incsearch = true
 opt.splitright = true
 opt.splitbelow = true
 
--- Appearance
 opt.termguicolors = true -- 24-bit colour; WezTerm supports it
 opt.signcolumn = 'yes' -- always on, so text does not jitter
 opt.showmode = false -- lualine already shows the mode
@@ -45,14 +42,12 @@ opt.fillchars = { eob = ' ' } -- hide the ~ on empty lines
 opt.list = true
 opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
 
--- Files & undo
 opt.undofile = true -- persistent undo across restarts
 opt.swapfile = false
 opt.backup = false
 opt.updatetime = 250 -- faster CursorHold -> gitsigns, diagnostics
 opt.timeoutlen = 400 -- which-key popup delay
 
--- Behaviour
 opt.mouse = 'a'
 opt.clipboard = 'unnamedplus' -- yank straight to the Windows clipboard
 opt.completeopt = { 'menu', 'menuone', 'noselect' }

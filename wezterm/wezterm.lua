@@ -1,14 +1,11 @@
--- ~/.wezterm.lua  --  WezTerm configuration
+-- WezTerm configuration. Lives in this repo and is read from
+-- ~/.config/wezterm/wezterm.lua via a directory junction.
 -- Docs: https://wezfurlong.org/wezterm/config/lua/general.html
 -- This file hot-reloads: save it and open windows update instantly.
 
 local wezterm = require 'wezterm'
 local act = wezterm.action
 local config = wezterm.config_builder()
-
---------------------------------------------------------------------
--- APPEARANCE
---------------------------------------------------------------------
 
 -- Try also: 'Tokyo Night', 'Kanagawa (Gogh)', 'Gruvbox dark, hard (base16)',
 -- 'Dracula (Official)', 'rose-pine'.  All ~1000 are browsable in-app with
@@ -25,7 +22,6 @@ config.font = wezterm.font_with_fallback {
 config.font_size = 11.5
 config.line_height = 1.1
 
--- Windows 11 acrylic blur behind the terminal.
 -- Set opacity to 1.0 if you would rather have a solid, opaque window.
 config.window_background_opacity = 0.88
 config.win32_system_backdrop = 'Acrylic'
@@ -44,10 +40,6 @@ config.inactive_pane_hsb = { saturation = 0.85, brightness = 0.7 }
 config.scrollback_lines = 10000
 config.audible_bell = 'Disabled'
 config.window_close_confirmation = 'NeverPrompt'
-
---------------------------------------------------------------------
--- TAB BAR
---------------------------------------------------------------------
 
 config.use_fancy_tab_bar = false          -- retro bar = fully themable, compact
 config.tab_bar_at_bottom = false
@@ -99,7 +91,6 @@ wezterm.on('format-tab-title', function(tab, _, _, _, hover, max_width)
   }
 end)
 
--- Right-hand status: current folder, then clock.
 wezterm.on('update-right-status', function(window, pane)
   local cwd = pane:get_current_working_dir()
   local cwd_str = ''
@@ -115,10 +106,6 @@ wezterm.on('update-right-status', function(window, pane)
   })
 end)
 
---------------------------------------------------------------------
--- SHELLS
---------------------------------------------------------------------
-
 config.default_prog = { 'powershell.exe', '-NoLogo' }
 
 config.launch_menu = {
@@ -127,38 +114,29 @@ config.launch_menu = {
   { label = 'WSL', args = { 'wsl.exe', '--cd', '~' } },
 }
 
---------------------------------------------------------------------
--- KEYS   (leader = Ctrl+a, tmux style)
---------------------------------------------------------------------
-
 config.leader = { key = 'a', mods = 'CTRL', timeout_milliseconds = 1000 }
 
 config.keys = {
-  -- Splits
   { key = '\\', mods = 'LEADER', action = act.SplitHorizontal { domain = 'CurrentPaneDomain' } },
   { key = '-',  mods = 'LEADER', action = act.SplitVertical { domain = 'CurrentPaneDomain' } },
   { key = 'x',  mods = 'LEADER', action = act.CloseCurrentPane { confirm = true } },
   { key = 'z',  mods = 'LEADER', action = act.TogglePaneZoomState },
 
-  -- Move between panes
   { key = 'LeftArrow',  mods = 'ALT', action = act.ActivatePaneDirection 'Left' },
   { key = 'RightArrow', mods = 'ALT', action = act.ActivatePaneDirection 'Right' },
   { key = 'UpArrow',    mods = 'ALT', action = act.ActivatePaneDirection 'Up' },
   { key = 'DownArrow',  mods = 'ALT', action = act.ActivatePaneDirection 'Down' },
 
-  -- Resize panes
   { key = 'LeftArrow',  mods = 'ALT|SHIFT', action = act.AdjustPaneSize { 'Left', 3 } },
   { key = 'RightArrow', mods = 'ALT|SHIFT', action = act.AdjustPaneSize { 'Right', 3 } },
   { key = 'UpArrow',    mods = 'ALT|SHIFT', action = act.AdjustPaneSize { 'Up', 3 } },
   { key = 'DownArrow',  mods = 'ALT|SHIFT', action = act.AdjustPaneSize { 'Down', 3 } },
 
-  -- Tabs
   { key = 't', mods = 'CTRL|SHIFT', action = act.SpawnTab 'CurrentPaneDomain' },
   { key = 'w', mods = 'CTRL|SHIFT', action = act.CloseCurrentTab { confirm = false } },
   { key = 'Tab', mods = 'CTRL', action = act.ActivateTabRelative(1) },
   { key = 'Tab', mods = 'CTRL|SHIFT', action = act.ActivateTabRelative(-1) },
 
-  -- Pick a shell / rename tab / command palette
   { key = 'l', mods = 'LEADER', action = act.ShowLauncherArgs { flags = 'FUZZY|LAUNCH_MENU_ITEMS' } },
   { key = 'p', mods = 'CTRL|SHIFT', action = act.ActivateCommandPalette },
   { key = 'r', mods = 'LEADER', action = act.PromptInputLine {
@@ -168,21 +146,17 @@ config.keys = {
       end),
   }},
 
-  -- Font size
   { key = '=', mods = 'CTRL', action = act.IncreaseFontSize },
   { key = '-', mods = 'CTRL', action = act.DecreaseFontSize },
   { key = '0', mods = 'CTRL', action = act.ResetFontSize },
 
-  -- Copy / paste / search
   { key = 'c', mods = 'CTRL|SHIFT', action = act.CopyTo 'Clipboard' },
   { key = 'v', mods = 'CTRL|SHIFT', action = act.PasteFrom 'Clipboard' },
   { key = 'f', mods = 'CTRL|SHIFT', action = act.Search { CaseInSensitiveString = '' } },
 
-  -- Fullscreen
   { key = 'F11', mods = 'NONE', action = act.ToggleFullScreen },
 }
 
--- Ctrl+1..9 jumps to that tab
 for i = 1, 9 do
   table.insert(config.keys, { key = tostring(i), mods = 'CTRL', action = act.ActivateTab(i - 1) })
 end

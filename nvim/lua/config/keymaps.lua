@@ -12,7 +12,6 @@ end
 -- Clear search highlight without losing the pattern.
 map('n', '<Esc>', '<cmd>nohlsearch<CR>', 'Clear search highlight')
 
--- Files
 map('n', '<leader>w', '<cmd>write<CR>', 'Write file')
 map('n', '<leader>q', '<cmd>quit<CR>', 'Quit window')
 map('n', '<leader>Q', '<cmd>qa!<CR>', 'Quit all, discard changes')
@@ -25,7 +24,6 @@ map('n', '<C-j>', '<C-w>j', 'Window down')
 map('n', '<C-k>', '<C-w>k', 'Window up')
 map('n', '<C-l>', '<C-w>l', 'Window right')
 
--- Window sizing and splits
 map('n', '<C-Up>', '<cmd>resize +2<CR>', 'Taller')
 map('n', '<C-Down>', '<cmd>resize -2<CR>', 'Shorter')
 map('n', '<C-Left>', '<cmd>vertical resize -2<CR>', 'Narrower')
@@ -33,7 +31,6 @@ map('n', '<C-Right>', '<cmd>vertical resize +2<CR>', 'Wider')
 map('n', [[<leader>\]], '<cmd>vsplit<CR>', 'Split vertically') -- matches WezTerm
 map('n', '<leader>-', '<cmd>split<CR>', 'Split horizontally') -- matches WezTerm
 
--- Buffers
 map('n', '<S-h>', '<cmd>bprevious<CR>', 'Previous buffer')
 map('n', '<S-l>', '<cmd>bnext<CR>', 'Next buffer')
 map('n', '<leader>bd', '<cmd>bdelete<CR>', 'Delete buffer')
@@ -57,7 +54,6 @@ map('v', '>', '>gv', 'Indent')
 -- Paste over a selection without clobbering the unnamed register.
 map('x', '<leader>p', [["_dP]], 'Paste without yanking')
 
--- Diagnostics
 map('n', '<leader>e', vim.diagnostic.open_float, 'Line diagnostics')
 map('n', '[d', function() vim.diagnostic.jump { count = -1, float = true } end, 'Previous diagnostic')
 map('n', ']d', function() vim.diagnostic.jump { count = 1, float = true } end, 'Next diagnostic')

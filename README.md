@@ -1,8 +1,8 @@
 # Dotfiles
 
 A Windows terminal environment built around [WezTerm](https://wezfurlong.org/wezterm/)
-and [Neovim](https://neovim.io/), kept under version control and linked into
-place with a single command each.
+and [Neovim](https://neovim.io/), kept under version control and installed onto
+a fresh machine with one command.
 
 ## Overview
 
@@ -38,6 +38,11 @@ configs, one repo, and no copies to keep in sync.
 - 🔒 **Plugin versions pinned.** `nvim/lazy-lock.json` is tracked, so a fresh
   machine resolves to the same plugin commits rather than whatever is on HEAD
   that day.
+- 📦 **One-command setup.** `.\dot.ps1 init` installs the stack from winget,
+  links every config, and verifies the result. Idempotent, and no admin rights.
+- 🩺 **A health check that catches silent drift.** `.\dot.ps1 doctor` proves the
+  junctions still resolve back to this repo and that Herdr is reading the config
+  in it — the two failures here that break nothing visibly.
 
 ## Quick Start
 
@@ -46,12 +51,18 @@ git clone https://github.com/connordevitt/dotfiles.git C:\Repositorys\dotfiles
 ```
 
 ```powershell
-cmd /c mklink /J "$env:USERPROFILE\.config\wezterm" "C:\Repositorys\dotfiles\wezterm"
-cmd /c mklink /J "$env:LOCALAPPDATA\nvim" "C:\Repositorys\dotfiles\nvim"
+cd C:\Repositorys\dotfiles
+.\dot.ps1 init
 ```
 
-Open WezTerm. Run `nvim` and wait once while plugins install. That is the
-entire setup.
+`init` installs the stack with winget, links this repo into the paths WezTerm
+and Neovim actually read, points Herdr at its config, and finishes with a
+health check. No administrator rights, and safe to re-run.
+
+Then open a **new** WezTerm window and run `nvim` once while plugins install.
+That is the entire setup.
+
+Prefer to do it by hand? See [Manual setup](#manual-setup).
 
 ## Repository Structure
 
@@ -59,6 +70,9 @@ entire setup.
 dotfiles/
 ├── README.md
 ├── .gitignore
+├── dot.ps1                # bootstrap + maintenance CLI
+├── packages/
+│   └── winget.txt         # winget package IDs, one per line
 ├── herdr/
 │   └── config.toml        # Herdr multiplexer: theme, keys, agent panel
 ├── nvim/
@@ -86,6 +100,59 @@ dotfiles/
 The three are designed to sit inside one another. Neovim runs in Herdr, and
 Herdr runs in a WezTerm window, so they share a palette and avoid colliding on
 keys.
+
+## The `dot.ps1` CLI
+
+One script at the repo root handles setup and maintenance. Every command is
+idempotent, and none of them need elevation.
+
+| Command | What it does |
+| --- | --- |
+| `init` | Install packages, link configs, verify. The one-command setup. |
+| `install` | Install the winget packages listed in `packages/winget.txt`. |
+| `agents` | Install the agent CLIs: Claude Code and Codex. |
+| `link` | Create the junctions and set `HERDR_CONFIG_PATH`. |
+| `unlink` | Remove the junctions and clear `HERDR_CONFIG_PATH`. |
+| `doctor` | Diagnose the environment. Exits non-zero if anything failed. |
+| `update` | `git pull`, upgrade packages, re-link, verify. |
+| `check-packages` | Manifest versus what is actually installed. |
+
+| Flag | Effect |
+| --- | --- |
+| `-WithAgents` | Also install the agent CLIs during `init` or `install`. |
+| `-SkipInstall` | `init` links and verifies without installing anything. |
+| `-Yes` | Assume yes at every prompt, including the remote install scripts. |
+
+Agent CLIs are opt-in. `init` sets up the terminal and editor only; nothing
+pulls in Claude Code or Codex unless you ask:
+
+```powershell
+.\dot.ps1 agents          # or: .\dot.ps1 init -WithAgents
+```
+
+### Why `doctor` exists
+
+Both failure modes this repo warns about are silent. A missing
+`HERDR_CONFIG_PATH` leaves Herdr running happily from the wrong file, and a
+stray `%USERPROFILE%\.wezterm.lua` outranks the whole repo. Nothing breaks
+visibly in either case, so nothing prompts you to look. `doctor` looks:
+
+```powershell
+.\dot.ps1 doctor
+```
+
+It checks every package, that the junctions resolve back to this repo rather
+than merely existing, that Neovim is new enough for `vim.lsp.config`, and that
+Herdr's config path points where it should. Run it first whenever something
+seems off.
+
+### A note on remote install scripts
+
+Two tools here cannot come from winget. Claude Code ships its own installer,
+and Herdr is not packaged for Windows at all. `dot.ps1` prints the exact
+command and asks before running Herdr's, rather than piping a third-party
+script into your shell on your behalf. `-Yes` skips the prompt if you would
+rather it did not ask.
 
 ## The WezTerm Config
 
@@ -541,26 +608,54 @@ editor.
   instead; zig is the smallest thing to install that satisfies it.
 - **ripgrep** and **fd.** Telescope's grep and file pickers shell out to these.
 
-Everything except WezTerm is on winget:
+All of it is on winget, WezTerm included. `.\dot.ps1 install` reads the same
+list from `packages/winget.txt`, so the two never drift apart:
 
 ```powershell
-winget install Neovim.Neovim zig.zig BurntSushi.ripgrep.MSVC sharkdp.fd
+winget install wez.wezterm Neovim.Neovim Git.Git zig.zig BurntSushi.ripgrep.MSVC sharkdp.fd
 ```
 
 No fonts are needed. Fonts ship inside WezTerm.
 
-### First-Time Setup
+Herdr is the exception. It is not on winget and publishes no Windows binaries,
+so its only install path is a remote script, which its own README labels a beta:
+
+```powershell
+irm https://herdr.dev/install.ps1 | iex
+```
+
+`dot.ps1` shows you that command and asks before running it.
+
+### Manual setup
+
+`.\dot.ps1 init` does all of this. The steps stay documented because
+understanding the wiring matters more than the script that applies it.
 
 1. Clone this repository to `C:\Repositorys\dotfiles`.
 2. Install the prerequisites with the winget line above.
 3. Delete `%USERPROFILE%\.wezterm.lua` if one exists, because it outranks this
    repo and will shadow it.
-4. Create both junctions with the `mklink /J` commands from
-   [Quick Start](#quick-start).
-5. Launch WezTerm, or press `Ctrl+Shift+R` in a running window.
-6. Run `nvim`. lazy.nvim clones itself, installs every plugin, and Mason pulls
+4. Create both junctions:
+
+   ```powershell
+   cmd /c mklink /J "$env:USERPROFILE\.config\wezterm" "C:\Repositorys\dotfiles\wezterm"
+   cmd /c mklink /J "$env:LOCALAPPDATA\nvim" "C:\Repositorys\dotfiles\nvim"
+   ```
+
+5. Point Herdr at its config. Easy to forget, and forgetting it fails silently:
+
+   ```powershell
+   [Environment]::SetEnvironmentVariable(
+     'HERDR_CONFIG_PATH',
+     'C:\Repositorys\dotfiles\herdr\config.toml',
+     'User')
+   ```
+
+6. Launch WezTerm, or press `Ctrl+Shift+R` in a running window.
+7. Run `nvim`. lazy.nvim clones itself, installs every plugin, and Mason pulls
    the language servers. This takes a minute or two and happens exactly once.
    Treesitter parsers compile in the background afterwards.
+8. Confirm it all took: `.\dot.ps1 doctor`.
 
 Verify the config is the one being loaded:
 
@@ -582,6 +677,15 @@ resolves back here. A `<Space>` that opens which-key is the quicker informal
 check.
 
 ## Troubleshooting
+
+Start here:
+
+```powershell
+.\dot.ps1 doctor
+```
+
+It names the broken thing and the fix for most of what follows. The entries
+below explain why each failure happens.
 
 ### Common Issues
 

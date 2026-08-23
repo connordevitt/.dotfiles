@@ -24,9 +24,6 @@ return {
       { 'j-hui/fidget.nvim', opts = { notification = { window = { winblend = 0 } } } },
     },
     config = function()
-      ----------------------------------------------------------------
-      -- Diagnostics
-      ----------------------------------------------------------------
       vim.diagnostic.config {
         severity_sort = true,
         underline = { severity = vim.diagnostic.severity.WARN },
@@ -42,9 +39,7 @@ return {
         },
       }
 
-      ----------------------------------------------------------------
-      -- Keymaps, bound per-buffer the moment a server attaches
-      ----------------------------------------------------------------
+      -- Bound per-buffer the moment a server attaches.
       vim.api.nvim_create_autocmd('LspAttach', {
         group = vim.api.nvim_create_augroup('lsp_attach', { clear = true }),
         callback = function(args)
@@ -98,9 +93,6 @@ return {
         end,
       })
 
-      ----------------------------------------------------------------
-      -- Servers
-      ----------------------------------------------------------------
       -- Applies to every server, on top of whatever lspconfig ships.
       vim.lsp.config('*', {
         capabilities = require('blink.cmp').get_lsp_capabilities(),

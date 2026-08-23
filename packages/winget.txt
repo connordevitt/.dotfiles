@@ -1,0 +1,12 @@
+# Core terminal and editor stack, installed by `.\dot.ps1 install`.
+# One winget package ID per line; blank lines and `#` comments are ignored.
+#
+# Agent CLIs are absent deliberately: each uses a different installer and they
+# are opt-in via `.\dot.ps1 agents`. Herdr is absent because it is not on winget.
+
+wez.wezterm
+Neovim.Neovim
+Git.Git                     # runtime dependency: lazy.nvim fetches plugins with it
+zig.zig                     # C compiler for treesitter parsers; MSVC or gcc work too
+BurntSushi.ripgrep.MSVC     # telescope live_grep
+sharkdp.fd                  # telescope find_files

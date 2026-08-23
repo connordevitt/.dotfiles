@@ -42,7 +42,6 @@ return {
     },
   },
 
-  -- Indent guides, with the current scope highlighted.
   {
     'lukas-reineke/indent-blankline.nvim',
     main = 'ibl',
