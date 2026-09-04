@@ -7,6 +7,7 @@
 wez.wezterm
 Neovim.Neovim
 Git.Git                     # runtime dependency: lazy.nvim fetches plugins with it
-zig.zig                     # C compiler for treesitter parsers; MSVC or gcc work too
+tree-sitter.tree-sitter-cli # nvim-treesitter (main branch) builds parsers with it
+zig.zig                     # C compiler the tree-sitter CLI drives; MSVC or gcc work too
 BurntSushi.ripgrep.MSVC     # telescope live_grep
 sharkdp.fd                  # telescope find_files

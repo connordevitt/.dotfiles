@@ -1,26 +1,36 @@
 -- Syntax highlighting, indentation, and text objects driven by real parsers.
 --
--- Windows note: parsers are compiled from C on install. There is no MSVC or
--- gcc on this machine, so zig is installed by winget and nvim-treesitter picks
--- it up off PATH automatically. If :TSInstall ever fails with "no C compiler
--- found", that is zig having gone missing from PATH.
+-- Both plugins are on their `main` branch. The old `master` branch is frozen
+-- and its README states Neovim 0.12 is not supported: its query directives
+-- (e.g. `#set-lang-from-info-string!` in queries/markdown/injections.scm) still
+-- read `match[id]` as a single TSNode, which became a node *list* in 0.11.
+-- On 0.12 that surfaced as a redraw-loop error on every markdown buffer --
+-- "attempt to call method 'range' (a nil value)" out of the treesitter
+-- highlighter -- because 0.12's runtime ftplugin auto-starts treesitter for
+-- markdown, and master's queries shadow the runtime's.
+--
+-- `main` is a parser/query installer and nothing more: highlighting, folds and
+-- injections now come from Neovim itself, so they are wired up below by hand.
+--
+-- Windows note: `main` shells out to the tree-sitter CLI (winget:
+-- tree-sitter.tree-sitter-cli) to build parsers. The CLI compiles via the Rust
+-- `cc` crate, which on an msvc target emits MSVC-style flags -- `zig cc` swallows
+-- those and exits 0 without writing parser.so, so zig alone is NOT enough here
+-- even though it was for master. A cl.exe-compatible compiler (LLVM's clang-cl,
+-- or MSVC build tools) has to be on PATH for `:TSUpdate` to build anything.
+--
+-- Neovim 0.12 bundles parsers for c, lua, markdown, markdown_inline, query, vim
+-- and vimdoc, so those keep highlighting with no compiler present at all.
 return {
   {
     'nvim-treesitter/nvim-treesitter',
-    -- Pinned to master deliberately. The `main` branch is the rewrite with a
-    -- different setup API (`require('nvim-treesitter').install{}` plus a manual
-    -- `vim.treesitter.start()` autocmd); the opts table below is master's shape.
-    -- Moving to main means rewriting this file, not flipping the branch.
-    branch = 'master',
+    -- main does not support lazy-loading, and parsers must be rebuilt whenever
+    -- the plugin updates or they fall out of sync with parser.lua.
+    lazy = false,
+    branch = 'main',
     build = ':TSUpdate',
-    event = { 'BufReadPost', 'BufNewFile' },
-    cmd = { 'TSInstall', 'TSUpdate', 'TSInstallInfo' },
-    dependencies = {
-      { 'nvim-treesitter/nvim-treesitter-textobjects', branch = 'master' },
-    },
-    main = 'nvim-treesitter.configs',
-    opts = {
-      ensure_installed = {
+    config = function()
+      require('nvim-treesitter').install {
         'bash',
         'c',
         'css',
@@ -31,8 +41,7 @@ return {
         'gitignore',
         'html',
         'javascript',
-        'json',
-        'jsonc',
+        'json', -- also used for jsonc; main has no separate jsonc parser
         'lua',
         'luadoc',
         'markdown',
@@ -48,37 +57,99 @@ return {
         'vim',
         'vimdoc',
         'yaml',
+      }
+
+      -- main dropped the separate jsonc parser; the json one handles it, but
+      -- only once the filetype is mapped to that language explicitly.
+      vim.treesitter.language.register('json', 'jsonc')
+
+      vim.api.nvim_create_autocmd('FileType', {
+        group = vim.api.nvim_create_augroup('treesitter_start', { clear = true }),
+        callback = function(args)
+          -- No parser for this filetype is the normal case, not an error --
+          -- plain text, log files, and anything not in the list above.
+          if not pcall(vim.treesitter.start, args.buf) then return end
+
+          local lang = vim.treesitter.language.get_lang(vim.bo[args.buf].filetype)
+          -- Indent queries are optional and missing for plenty of languages.
+          -- Setting indentexpr without one indents worse than the default.
+          if lang and vim.treesitter.query.get(lang, 'indents') then
+            vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+          end
+        end,
+      })
+    end,
+  },
+
+  {
+    'nvim-treesitter/nvim-treesitter-textobjects',
+    branch = 'main',
+    dependencies = { 'nvim-treesitter/nvim-treesitter' },
+    opts = {
+      select = { lookahead = true },
+      move = { set_jumps = true },
+    },
+    keys = {
+      -- main drops the keymap table master had; these are the same bindings.
+      {
+        'af',
+        function() require('nvim-treesitter-textobjects.select').select_textobject('@function.outer', 'textobjects') end,
+        mode = { 'x', 'o' },
+        desc = 'a function',
       },
-      auto_install = true, -- pull a parser on first open of a filetype
-      highlight = { enable = true },
-      indent = { enable = true },
-      incremental_selection = {
-        enable = true,
-        keymaps = {
-          init_selection = '<C-space>',
-          node_incremental = '<C-space>',
-          node_decremental = '<BS>',
-        },
+      {
+        'if',
+        function() require('nvim-treesitter-textobjects.select').select_textobject('@function.inner', 'textobjects') end,
+        mode = { 'x', 'o' },
+        desc = 'inner function',
       },
-      textobjects = {
-        select = {
-          enable = true,
-          lookahead = true,
-          keymaps = {
-            ['af'] = '@function.outer',
-            ['if'] = '@function.inner',
-            ['ac'] = '@class.outer',
-            ['ic'] = '@class.inner',
-            ['aa'] = '@parameter.outer',
-            ['ia'] = '@parameter.inner',
-          },
-        },
-        move = {
-          enable = true,
-          set_jumps = true,
-          goto_next_start = { [']f'] = '@function.outer', [']c'] = '@class.outer' },
-          goto_previous_start = { ['[f'] = '@function.outer', ['[c'] = '@class.outer' },
-        },
+      {
+        'ac',
+        function() require('nvim-treesitter-textobjects.select').select_textobject('@class.outer', 'textobjects') end,
+        mode = { 'x', 'o' },
+        desc = 'a class',
+      },
+      {
+        'ic',
+        function() require('nvim-treesitter-textobjects.select').select_textobject('@class.inner', 'textobjects') end,
+        mode = { 'x', 'o' },
+        desc = 'inner class',
+      },
+      {
+        'aa',
+        function() require('nvim-treesitter-textobjects.select').select_textobject('@parameter.outer', 'textobjects') end,
+        mode = { 'x', 'o' },
+        desc = 'an argument',
+      },
+      {
+        'ia',
+        function() require('nvim-treesitter-textobjects.select').select_textobject('@parameter.inner', 'textobjects') end,
+        mode = { 'x', 'o' },
+        desc = 'inner argument',
+      },
+      {
+        ']f',
+        function() require('nvim-treesitter-textobjects.move').goto_next_start('@function.outer', 'textobjects') end,
+        mode = { 'n', 'x', 'o' },
+        desc = 'Next function',
+      },
+      {
+        ']c',
+        function() require('nvim-treesitter-textobjects.move').goto_next_start('@class.outer', 'textobjects') end,
+        mode = { 'n', 'x', 'o' },
+        desc = 'Next class',
+      },
+      {
+        '[f',
+        function() require('nvim-treesitter-textobjects.move').goto_previous_start('@function.outer', 'textobjects') end,
+        mode = { 'n', 'x', 'o' },
+        desc = 'Previous function',
+      },
+      {
+        '[c',
+        function() require('nvim-treesitter-textobjects.move').goto_previous_start('@class.outer', 'textobjects') end,
+        mode = { 'n', 'x', 'o' },
+        desc = 'Previous class',
       },
     },
   },
