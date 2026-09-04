@@ -21,6 +21,45 @@
 --
 -- Neovim 0.12 bundles parsers for c, lua, markdown, markdown_inline, query, vim
 -- and vimdoc, so those keep highlighting with no compiler present at all.
+
+-- Parser installation is NOT automatic, on purpose. `install()` is documented
+-- as a no-op once a parser is present, but a parser that fails to *compile*
+-- never becomes present, so any automatic call retries forever:
+--   * from `config` it re-downloads all 26 parsers on every launch;
+--   * from `build` it is worse -- lazy.nvim sets `_.build = not installed[name]`,
+--     so a failed build stays flagged and re-runs at every startup, blocking
+--     the editor while it downloads and fails again.
+-- Either way `nvim <file>` becomes unusable. Run `:TSInstallConfigured` once a
+-- working C compiler is on PATH; `:TSInstall <lang>` covers one-offs.
+local languages = {
+  'bash',
+  'c',
+  'css',
+  'diff',
+  'dockerfile',
+  'git_config',
+  'gitcommit',
+  'gitignore',
+  'html',
+  'javascript',
+  'json', -- also used for jsonc; main has no separate jsonc parser
+  'lua',
+  'luadoc',
+  'markdown',
+  'markdown_inline',
+  'powershell',
+  'python',
+  'query',
+  'regex',
+  'rust',
+  'toml',
+  'tsx',
+  'typescript',
+  'vim',
+  'vimdoc',
+  'yaml',
+}
+
 return {
   {
     'nvim-treesitter/nvim-treesitter',
@@ -28,36 +67,12 @@ return {
     -- the plugin updates or they fall out of sync with parser.lua.
     lazy = false,
     branch = 'main',
-    build = ':TSUpdate',
     config = function()
-      require('nvim-treesitter').install {
-        'bash',
-        'c',
-        'css',
-        'diff',
-        'dockerfile',
-        'git_config',
-        'gitcommit',
-        'gitignore',
-        'html',
-        'javascript',
-        'json', -- also used for jsonc; main has no separate jsonc parser
-        'lua',
-        'luadoc',
-        'markdown',
-        'markdown_inline',
-        'powershell',
-        'python',
-        'query',
-        'regex',
-        'rust',
-        'toml',
-        'tsx',
-        'typescript',
-        'vim',
-        'vimdoc',
-        'yaml',
-      }
+      vim.api.nvim_create_user_command(
+        'TSInstallConfigured',
+        function() require('nvim-treesitter').install(languages) end,
+        { desc = 'Install every parser this config expects' }
+      )
 
       -- main dropped the separate jsonc parser; the json one handles it, but
       -- only once the filetype is mapped to that language explicitly.
@@ -93,43 +108,57 @@ return {
       -- main drops the keymap table master had; these are the same bindings.
       {
         'af',
-        function() require('nvim-treesitter-textobjects.select').select_textobject('@function.outer', 'textobjects') end,
+        function()
+          require('nvim-treesitter-textobjects.select').select_textobject('@function.outer', 'textobjects')
+        end,
         mode = { 'x', 'o' },
         desc = 'a function',
       },
       {
         'if',
-        function() require('nvim-treesitter-textobjects.select').select_textobject('@function.inner', 'textobjects') end,
+        function()
+          require('nvim-treesitter-textobjects.select').select_textobject('@function.inner', 'textobjects')
+        end,
         mode = { 'x', 'o' },
         desc = 'inner function',
       },
       {
         'ac',
-        function() require('nvim-treesitter-textobjects.select').select_textobject('@class.outer', 'textobjects') end,
+        function()
+          require('nvim-treesitter-textobjects.select').select_textobject('@class.outer', 'textobjects')
+        end,
         mode = { 'x', 'o' },
         desc = 'a class',
       },
       {
         'ic',
-        function() require('nvim-treesitter-textobjects.select').select_textobject('@class.inner', 'textobjects') end,
+        function()
+          require('nvim-treesitter-textobjects.select').select_textobject('@class.inner', 'textobjects')
+        end,
         mode = { 'x', 'o' },
         desc = 'inner class',
       },
       {
         'aa',
-        function() require('nvim-treesitter-textobjects.select').select_textobject('@parameter.outer', 'textobjects') end,
+        function()
+          require('nvim-treesitter-textobjects.select').select_textobject('@parameter.outer', 'textobjects')
+        end,
         mode = { 'x', 'o' },
         desc = 'an argument',
       },
       {
         'ia',
-        function() require('nvim-treesitter-textobjects.select').select_textobject('@parameter.inner', 'textobjects') end,
+        function()
+          require('nvim-treesitter-textobjects.select').select_textobject('@parameter.inner', 'textobjects')
+        end,
         mode = { 'x', 'o' },
         desc = 'inner argument',
       },
       {
         ']f',
-        function() require('nvim-treesitter-textobjects.move').goto_next_start('@function.outer', 'textobjects') end,
+        function()
+          require('nvim-treesitter-textobjects.move').goto_next_start('@function.outer', 'textobjects')
+        end,
         mode = { 'n', 'x', 'o' },
         desc = 'Next function',
       },
@@ -141,13 +170,17 @@ return {
       },
       {
         '[f',
-        function() require('nvim-treesitter-textobjects.move').goto_previous_start('@function.outer', 'textobjects') end,
+        function()
+          require('nvim-treesitter-textobjects.move').goto_previous_start('@function.outer', 'textobjects')
+        end,
         mode = { 'n', 'x', 'o' },
         desc = 'Previous function',
       },
       {
         '[c',
-        function() require('nvim-treesitter-textobjects.move').goto_previous_start('@class.outer', 'textobjects') end,
+        function()
+          require('nvim-treesitter-textobjects.move').goto_previous_start('@class.outer', 'textobjects')
+        end,
         mode = { 'n', 'x', 'o' },
         desc = 'Previous class',
       },

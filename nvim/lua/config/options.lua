@@ -48,6 +48,14 @@ opt.backup = false
 opt.updatetime = 250 -- faster CursorHold -> gitsigns, diagnostics
 opt.timeoutlen = 400 -- which-key popup delay
 
+-- Windows-style selection: a shifted cursor key starts and extends a highlight,
+-- an unshifted one drops it. Covers Shift+Arrow (by character/line) and
+-- Ctrl+Shift+Arrow (by word), which is the muscle memory this borrows from.
+-- This is Visual mode, not Select mode -- the highlight is the same, but the
+-- selection survives typing instead of being replaced. Add 'key' to
+-- 'selectmode' if you want the replace-on-type behaviour too.
+opt.keymodel = { 'startsel', 'stopsel' }
+
 opt.mouse = 'a'
 opt.clipboard = 'unnamedplus' -- yank straight to the Windows clipboard
 opt.completeopt = { 'menu', 'menuone', 'noselect' }
