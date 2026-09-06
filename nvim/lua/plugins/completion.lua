@@ -24,6 +24,12 @@ return {
 
       sources = {
         default = { 'lsp', 'path', 'snippets', 'buffer' },
+        -- lazydev knows about the Neovim runtime; it goes above the LSP
+        -- source so its results are not buried by lua_ls's.
+        per_filetype = { lua = { 'lazydev', 'lsp', 'path', 'snippets', 'buffer' } },
+        providers = {
+          lazydev = { name = 'LazyDev', module = 'lazydev.integrations.blink', score_offset = 100 },
+        },
       },
 
       fuzzy = { implementation = 'prefer_rust_with_warning' },

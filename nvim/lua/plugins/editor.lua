@@ -84,6 +84,10 @@ return {
         { '<leader>g', group = 'git' },
         { '<leader>c', group = 'code' },
         { '<leader>x', group = 'diagnostics' },
+        { '<leader>h', group = 'harpoon' },
+        { '<leader>s', group = 'search/replace' },
+        { '<leader>u', group = 'undo' },
+        { '<leader>z', group = 'toggle' },
       },
     },
     keys = {

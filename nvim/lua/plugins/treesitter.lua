@@ -186,4 +186,21 @@ return {
       },
     },
   },
+
+  -- Sticky header showing the function/class the top of the window is inside.
+  {
+    'nvim-treesitter/nvim-treesitter-context',
+    event = { 'BufReadPost', 'BufNewFile' },
+    opts = { max_lines = 3, multiline_threshold = 1, separator = '-' },
+    keys = {
+      { '<leader>zc', '<cmd>TSContextToggle<CR>', desc = 'Toggle treesitter context' },
+    },
+  },
+
+  -- Closes and renames HTML/JSX tags as they are typed.
+  {
+    'windwp/nvim-ts-autotag',
+    event = { 'BufReadPre', 'BufNewFile' },
+    opts = { opts = { enable_close = true, enable_rename = true, enable_close_on_slash = false } },
+  },
 }

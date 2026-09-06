@@ -22,12 +22,24 @@ return {
         opts = { automatic_enable = false },
       },
       { 'j-hui/fidget.nvim', opts = { notification = { window = { winblend = 0 } } } },
+      -- Full Neovim API completion and docs inside this config, without
+      -- pointing lua_ls at the whole runtime by hand.
+      {
+        'folke/lazydev.nvim',
+        ft = 'lua',
+        opts = {
+          library = {
+            { path = '${3rd}/luv/library', words = { 'vim%.uv' } },
+          },
+        },
+      },
     },
     config = function()
       vim.diagnostic.config {
         severity_sort = true,
         underline = { severity = vim.diagnostic.severity.WARN },
-        virtual_text = { spacing = 2, prefix = '●', source = 'if_many' },
+        -- Off: tiny-inline-diagnostic renders these instead, see ux.lua.
+        virtual_text = false,
         float = { border = 'rounded', source = 'if_many' },
         signs = {
           text = {
