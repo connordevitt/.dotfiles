@@ -157,6 +157,11 @@ next_workspace = "prefix+)"
 # Default: unset.
 focus_agent = "prefix+alt+1..9"
 
+# Jump to tab N in the current space. alt, not ctrl: ctrl+digit never reaches
+# Herdr on Windows (ConPTY drops it), so wezterm.lua maps ctrl+1..9 to alt+1..9.
+# Default: "prefix+1..9".
+switch_tab = "alt+1..9"
+
 # Create a tab in the active workspace.
 # Default: "prefix+c".
 # new_tab = "prefix+c"

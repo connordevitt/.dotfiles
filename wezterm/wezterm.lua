@@ -157,8 +157,13 @@ config.keys = {
   { key = 'F11', mods = 'NONE', action = act.ToggleFullScreen },
 }
 
+-- ctrl+1..9 jumps to tab N in the current Herdr space. ctrl+digit can't be
+-- encoded through ConPTY, so resend it as alt+digit, which Herdr binds to
+-- switch_tab (herdr/config.toml). Going through Herdr's key handling keeps
+-- the tab bar highlight in sync, unlike driving the CLI.
+-- WezTerm tabs still cycle with ctrl+tab / ctrl+shift+tab.
 for i = 1, 9 do
-  table.insert(config.keys, { key = tostring(i), mods = 'CTRL', action = act.ActivateTab(i - 1) })
+  table.insert(config.keys, { key = tostring(i), mods = 'CTRL', action = act.SendKey { key = tostring(i), mods = 'ALT' } })
 end
 
 return config
