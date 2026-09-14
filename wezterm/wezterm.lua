@@ -102,7 +102,7 @@ wezterm.on('update-right-status', function(window, pane)
     { Foreground = { Color = '#89b4fa' } },
     { Text = cwd_str ~= '' and (wezterm.nerdfonts.oct_file_directory .. '  ' .. cwd_str .. '   ') or '' },
     { Foreground = { Color = '#f9e2af' } },
-    { Text = wezterm.nerdfonts.md_clock_outline .. '  ' .. wezterm.strftime '%H:%M  ' },
+    { Text = wezterm.nerdfonts.md_clock_outline .. '  ' .. wezterm.strftime '%-I:%M %p  ' },
   })
 end)
 
