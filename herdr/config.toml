@@ -162,7 +162,8 @@ focus_agent = "prefix+alt+1..9"
 # Default: "prefix+1..9".
 switch_tab = "alt+1..9"
 
-# Create a tab in the active workspace.
+# Create a tab in the active workspace. Left at the default: Herdr ignores
+# extra non-prefix keys listed here, so wezterm.lua's ctrl+t sends prefix+c.
 # Default: "prefix+c".
 # new_tab = "prefix+c"
 
