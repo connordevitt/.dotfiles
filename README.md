@@ -201,9 +201,8 @@ Leader is `Ctrl+a`, pressed before the listed key.
 | `Leader` + `r` | Rename current tab |
 | `Alt` + arrows | Move between panes |
 | `Alt`+`Shift` + arrows | Resize pane |
-| `Ctrl`+`Shift` + `T` / `W` | New / close tab |
+| `Ctrl`+`Shift` + `M` / `W` | New / close tab |
 | `Ctrl` + `Tab` | Next tab (add `Shift` for previous) |
-| `Ctrl` + `1` to `9` | Jump to tab N |
 | `Ctrl`+`Shift` + `P` | Command palette |
 | `Ctrl`+`Shift` + `F` | Search scrollback |
 | `Ctrl`+`Shift` + `C` / `V` | Copy / paste |
@@ -305,9 +304,21 @@ changes or relies on are listed; `prefix+?` shows the full set.
 | `Prefix` + `v` | Keyboard copy mode |
 | `Prefix` + `Shift`+`S` | Settings |
 | `Prefix` + `Alt` + `1` to `9` | Focus agent N |
+| `Prefix` + `c`, or `Ctrl` + `T` | New tab |
+| `Ctrl` + `1` to `9` | Jump to tab N |
 
 The split and close keys deliberately match WezTerm's, so the same two
 keystrokes do the same thing whether or not Herdr is running.
+
+The last two rows are Herdr actions on WezTerm keys, relayed by `wezterm.lua`.
+ConPTY never delivers `Ctrl`+digit, so WezTerm resends it as `Alt`+digit, which
+Herdr's `switch_tab` binds. `Ctrl`+`T` is relayed differently: Herdr ignores
+extra plain keys added to a binding like `new_tab`, so WezTerm types the stock
+`prefix` then `c` instead. Both mappings assume the prefix is `ctrl+semicolon`
+-- change `keys.prefix` and `wezterm.lua` needs the same edit.
+
+Note `Ctrl`+digit and `Ctrl`+`T` move **Herdr** tabs. WezTerm's own tabs cycle
+with `Ctrl`+`Tab` and open with `Ctrl`+`Shift`+`M`.
 
 ### What Differs From Upstream
 
