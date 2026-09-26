@@ -1,5 +1,5 @@
 {
-  "version": "0.9.0-preview.2026-09-08-62431dbd033b",
-  "body": "Preview build 2026-09-08-62431dbd033b\n\nBuilt from `62431dbd033b` on `master`.\nBase stable: v0.9.0\nCompare: https://github.com/herdrdev/herdr/compare/v0.9.0...62431dbd033bf1be2fe87fbc526df28084214e49\n\n### Fixed\n- Reduce idle ssh cpu without dropping final output (#3728)",
+  "version": "0.9.1-preview.2026-09-21-0ff0f27e2226",
+  "body": "Preview build 2026-09-21-0ff0f27e2226\n\n[View changes](https://github.com/herdrdev/herdr/compare/2c29fb29e30220bc48d783af90ba8f53b81fd96c...0ff0f27e222633c97ba4291f6b9be4137002ca84)",
   "show_on_startup": true
 }
