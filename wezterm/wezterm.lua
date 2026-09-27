@@ -110,6 +110,10 @@ config.launch_menu = {
 config.leader = { key = "a", mods = "CTRL", timeout_milliseconds = 1000 }
 
 config.keys = {
+	-- Ctrl+a twice sends a real Ctrl+a, which the leader otherwise swallows
+	-- (nvim increment, PowerShell select-all). dmmulroy uses Ghostty with no
+	-- leader, so there is nothing of his to mirror here.
+	{ key = "a", mods = "LEADER|CTRL", action = act.SendKey({ key = "a", mods = "CTRL" }) },
 	{ key = "\\", mods = "LEADER", action = act.SplitHorizontal({ domain = "CurrentPaneDomain" }) },
 	{ key = "-", mods = "LEADER", action = act.SplitVertical({ domain = "CurrentPaneDomain" }) },
 	{ key = "x", mods = "LEADER", action = act.CloseCurrentPane({ confirm = true }) },

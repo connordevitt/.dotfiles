@@ -199,6 +199,7 @@ Leader is `Ctrl+a`, pressed before the listed key.
 | `Leader` + `z` | Zoom / unzoom pane |
 | `Leader` + `l` | Launcher (pick a shell) |
 | `Leader` + `r` | Rename current tab |
+| `Leader` + `Ctrl+a` | Send a real `Ctrl+a` (nvim increment, PowerShell select-all) |
 | `Alt` + arrows | Move between panes |
 | `Alt`+`Shift` + arrows | Resize pane |
 | `Ctrl`+`Shift` + `M` / `W` | New / close tab |
