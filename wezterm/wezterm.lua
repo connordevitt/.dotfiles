@@ -109,31 +109,19 @@ config.launch_menu = {
 
 config.leader = { key = "a", mods = "CTRL", timeout_milliseconds = 1000 }
 
+-- Sends Herdr's prefix (ctrl+;, see herdr/config.toml) followed by a key.
+-- A physically pressed ctrl+; never reaches Herdr on Windows: Herdr's input
+-- decoder drops VK_OEM_1 with Ctrl held (it only special-cases ctrl+/). The
+-- SendKey version carries the ';' character, which Herdr does decode.
+local function herdr(key, mods)
+	return act.Multiple({ act.SendKey({ key = ";", mods = "CTRL" }), act.SendKey({ key = key, mods = mods }) })
+end
+
 config.keys = {
 	-- Ctrl+a twice sends a real Ctrl+a, which the leader otherwise swallows
 	-- (nvim increment, PowerShell select-all). dmmulroy uses Ghostty with no
 	-- leader, so there is nothing of his to mirror here.
 	{ key = "a", mods = "LEADER|CTRL", action = act.SendKey({ key = "a", mods = "CTRL" }) },
-	-- Splits pass through to Herdr (prefix ctrl+;, see herdr/config.toml) so the
-	-- new pane lives inside the Herdr session. A WezTerm split would spawn
-	-- default_prog, a bare PowerShell outside Herdr. Same pattern as ctrl+t.
-	{
-		key = "\\",
-		mods = "LEADER",
-		action = act.Multiple({ act.SendKey({ key = ";", mods = "CTRL" }), act.SendKey({ key = "\\" }) }),
-	},
-	{
-		key = "-",
-		mods = "LEADER",
-		action = act.Multiple({ act.SendKey({ key = ";", mods = "CTRL" }), act.SendKey({ key = "-" }) }),
-	},
-	-- Close passes through to Herdr's close_pane for the same reason; a WezTerm
-	-- close would kill the pane hosting Herdr, taking the whole session with it.
-	{
-		key = "x",
-		mods = "LEADER",
-		action = act.Multiple({ act.SendKey({ key = ";", mods = "CTRL" }), act.SendKey({ key = "x" }) }),
-	},
 	{ key = "z", mods = "LEADER", action = act.TogglePaneZoomState },
 
 	{ key = "LeftArrow", mods = "ALT", action = act.ActivatePaneDirection("Left") },
@@ -148,19 +136,15 @@ config.keys = {
 
 	{ key = "m", mods = "CTRL|SHIFT", action = act.SpawnTab("CurrentPaneDomain") },
 
-	{
-		key = "t",
-		mods = "CTRL",
-		action = act.Multiple({
-			act.SendKey({ key = ";", mods = "CTRL" }),
-			act.SendKey({ key = "c" }),
-		}),
-	},
+	{ key = "t", mods = "CTRL", action = herdr("c") },
+	-- Cycle Herdr panes (cycle_pane_next = prefix+tab), tap until you land.
+	-- result with two side-by-side panes, but it wraps, and nvim never sees
+	-- ctrl+l. Also costs PowerShell's clear-screen.
+	{ key = "l", mods = "CTRL", action = herdr("Tab") },
 	{ key = "w", mods = "CTRL|SHIFT", action = act.CloseCurrentTab({ confirm = false }) },
 	{ key = "Tab", mods = "CTRL", action = act.ActivateTabRelative(1) },
 	{ key = "Tab", mods = "CTRL|SHIFT", action = act.ActivateTabRelative(-1) },
 
-	{ key = "l", mods = "LEADER", action = act.ShowLauncherArgs({ flags = "FUZZY|LAUNCH_MENU_ITEMS" }) },
 	{ key = "p", mods = "CTRL|SHIFT", action = act.ActivateCommandPalette },
 	{
 		key = "r",
@@ -186,11 +170,47 @@ config.keys = {
 	{ key = "F11", mods = "NONE", action = act.ToggleFullScreen },
 }
 
+-- Leader + key becomes Herdr prefix + key, so ctrl+a drives dmmulroy's Herdr
+-- bindings. Splits and close must go to Herdr: a WezTerm split spawns a bare
+-- PowerShell outside Herdr, and a WezTerm close kills Herdr's host pane.
+-- r and z stay WezTerm's (rename tab, zoom) above.
+for _, key in ipairs({
+	"\\",
+	"-",
+	"x", -- split right, split down, close pane
+	"h",
+	"j",
+	"k",
+	"l", -- focus pane
+	"c",
+	"n",
+	"p",
+	",", -- new, next, previous, rename tab
+	"w",
+	"s",
+	"(",
+	")", -- workspace picker, previous/next workspace
+	"i",
+	"o", -- jump to the notifying agent (dmmulroy: i, Herdr default: o)
+	"m",
+	"v",
+	"b",
+	"d",
+	"q",
+	"?", -- zoom, copy mode, sidebar, detach, help
+}) do
+	table.insert(config.keys, { key = key, mods = "LEADER", action = herdr(key) })
+end
+
 for i = 1, 9 do
 	table.insert(
 		config.keys,
 		{ key = tostring(i), mods = "CTRL", action = act.SendKey({ key = tostring(i), mods = "ALT" }) }
 	)
+	-- Leader + ctrl+N focuses Agent N (focus_agent = "prefix+alt+1..9"). Ctrl, not
+	-- alt: another app on this machine grabs alt+1/alt+2 as global hotkeys, and
+	-- SendKey synthesizes the alt+N so it never passes through Windows.
+	table.insert(config.keys, { key = tostring(i), mods = "LEADER|CTRL", action = herdr(tostring(i), "ALT") })
 end
 
 return config

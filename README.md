@@ -193,12 +193,9 @@ Leader is `Ctrl+a`, pressed before the listed key.
 
 | Binding | Action |
 | --- | --- |
-| `Leader` + `\` | Split into left and right panes (sent to Herdr) |
-| `Leader` + `-` | Split into top and bottom panes (sent to Herdr) |
-| `Leader` + `x` | Close the focused pane |
-| `Leader` + `z` | Zoom / unzoom pane |
-| `Leader` + `l` | Launcher (pick a shell) |
-| `Leader` + `r` | Rename current tab |
+| `Leader` + Herdr key | Sent to Herdr as `Ctrl+;` + key (see [Herdr keybindings](#keybindings-1)) |
+| `Leader` + `z` | Zoom / unzoom WezTerm pane |
+| `Leader` + `r` | Rename current WezTerm tab |
 | `Leader` + `Ctrl+a` | Send a real `Ctrl+a` (nvim increment, PowerShell select-all) |
 | `Alt` + arrows | Move between panes |
 | `Alt`+`Shift` + arrows | Resize pane |
@@ -219,7 +216,7 @@ side by side in a single window:
 ```
 Ctrl+a  \        split into left and right
                  (left pane keeps focus, run your agent here)
-Ctrl+;  l        move to the right pane (Herdr)
+Ctrl+a  l        move to the right pane (Herdr)
 nvim             open the editor there
 ```
 
@@ -286,26 +283,32 @@ precedence trap below.
 
 ### Keybindings
 
-Prefix is `Ctrl+;`, pressed before the listed key. Only the keys this repo
-changes or relies on are listed; `prefix+?` shows the full set.
+Prefix is `Ctrl+;` (dmmulroy's), but **press `Ctrl+a` instead**. A physically
+pressed `Ctrl+;` never reaches Herdr on Windows: Herdr's input decoder drops
+`VK_OEM_1` with Ctrl held (it only special-cases `Ctrl+/`). `wezterm.lua`
+turns `Ctrl+a` + key into a synthesized `Ctrl+;` + key, which Herdr does read.
 
-| Binding | Action |
+| `Ctrl+a` + | Herdr action |
 | --- | --- |
-| `Prefix` + `\` | Split into left and right panes |
-| `Prefix` + `-` | Split into top and bottom panes |
-| `Prefix` + `x` | Close the focused pane |
-| `Prefix` + `s` / `w` | Workspace picker |
-| `Prefix` + `d` / `q` | Detach |
-| `Prefix` + `r` | Reload config |
-| `Prefix` + `,` | Rename tab |
-| `Prefix` + `v` | Keyboard copy mode |
-| `Prefix` + `Shift`+`S` | Settings |
-| `Prefix` + `Alt` + `1` to `9` | Focus agent N |
-| `Prefix` + `c`, or `Ctrl` + `T` | New tab |
+| `\` / `-` | Split into left and right / top and bottom panes |
+| `x` | Close the focused pane |
+| `h` `j` `k` `l` | Focus pane left / down / up / right |
+| `Ctrl` + `L` (no leader) | Cycle to the next pane |
+| `c`, or `Ctrl` + `T` | New tab |
+| `n` / `p` / `,` | Next / previous / rename tab |
+| `s` / `w` | Workspace picker |
+| `(` / `)` | Previous / next workspace |
+| `Ctrl` + `1` to `9` | Focus agent N (sent as Herdr's `prefix+alt+N`) |
+| `i` / `o` | Jump to the agent that notified |
+| `m` | Zoom pane |
+| `v` | Keyboard copy mode |
+| `b` | Toggle sidebar |
+| `d` / `q` | Detach |
+| `?` | Herdr keybinding help |
 | `Ctrl` + `1` to `9` | Jump to tab N |
 
-The split and close keys deliberately match WezTerm's, so the same two
-keystrokes do the same thing whether or not Herdr is running.
+`Ctrl+a` + `r` and `z` stay WezTerm's (rename tab, zoom), so Herdr's reload
+(`prefix+r`) is only reachable via `herdr server reload-config`.
 
 The last two rows are Herdr actions on WezTerm keys, relayed by `wezterm.lua`.
 ConPTY never delivers `Ctrl`+digit, so WezTerm resends it as `Alt`+digit, which
