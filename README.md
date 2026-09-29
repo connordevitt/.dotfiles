@@ -193,8 +193,8 @@ Leader is `Ctrl+a`, pressed before the listed key.
 
 | Binding | Action |
 | --- | --- |
-| `Leader` + `\` | Split into left and right panes |
-| `Leader` + `-` | Split into top and bottom panes |
+| `Leader` + `\` | Split into left and right panes (sent to Herdr) |
+| `Leader` + `-` | Split into top and bottom panes (sent to Herdr) |
 | `Leader` + `x` | Close the focused pane |
 | `Leader` + `z` | Zoom / unzoom pane |
 | `Leader` + `l` | Launcher (pick a shell) |
@@ -219,7 +219,7 @@ side by side in a single window:
 ```
 Ctrl+a  \        split into left and right
                  (left pane keeps focus, run your agent here)
-Alt+Right        move to the right pane
+Ctrl+;  l        move to the right pane (Herdr)
 nvim             open the editor there
 ```
 
@@ -227,16 +227,12 @@ Closing a pane again:
 
 | Way | Behaviour |
 | --- | --- |
-| `Ctrl+a` then `x` | Closes the focused pane |
+| `Ctrl+a` then `x` | Closes the focused Herdr pane |
 | `exit` | Shell exits, pane closes with it, never prompts |
 | `Ctrl+d` | Same as `exit`, on an empty prompt |
 
-`Leader+x` is bound with `confirm = true`, but that does not mean it always
-asks. WezTerm keeps a default `skip_close_confirmation_for_processes_named`
-list that includes `powershell.exe` and `pwsh.exe`, so a pane sitting at a
-plain prompt closes instantly. The prompt only appears when something else is
-running in the pane, which is exactly when it is wanted: an editor with unsaved
-work, or an agent mid-task. Nothing in this repo overrides that list.
+`Leader+x` is sent to Herdr as its `close_pane` (`Ctrl+;` then `x`), so it
+closes the focused Herdr pane rather than the WezTerm pane hosting Herdr.
 
 When the last pane in a tab closes, the tab closes. When the last tab closes,
 so does the window, and `window_close_confirmation = 'NeverPrompt'` means it
@@ -247,10 +243,10 @@ the focused pane to fill the window and leaves the other one running behind
 it, which beats closing a pane just to read something in full width.
 
 ⚠️ The two layers disagree on what to call these splits, and both names are
-misleading. `Leader+\` maps to WezTerm's `SplitHorizontal`, while Herdr calls
-the same key `split_vertical`. Neither name describes the result: **`\` always
-gives you left and right panes, and `-` always gives you top and bottom**, at
-either layer. Ignore the names and remember the keys.
+misleading. `Leader+\` sends Herdr's `split_vertical`, which WezTerm would
+call `SplitHorizontal`. Neither name describes the result: **`\` always
+gives you left and right panes, and `-` always gives you top and bottom**.
+Both leader splits go to Herdr, so run Herdr first. Ignore the names and remember the keys.
 
 ## Herdr
 

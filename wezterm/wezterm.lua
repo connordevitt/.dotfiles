@@ -114,9 +114,26 @@ config.keys = {
 	-- (nvim increment, PowerShell select-all). dmmulroy uses Ghostty with no
 	-- leader, so there is nothing of his to mirror here.
 	{ key = "a", mods = "LEADER|CTRL", action = act.SendKey({ key = "a", mods = "CTRL" }) },
-	{ key = "\\", mods = "LEADER", action = act.SplitHorizontal({ domain = "CurrentPaneDomain" }) },
-	{ key = "-", mods = "LEADER", action = act.SplitVertical({ domain = "CurrentPaneDomain" }) },
-	{ key = "x", mods = "LEADER", action = act.CloseCurrentPane({ confirm = true }) },
+	-- Splits pass through to Herdr (prefix ctrl+;, see herdr/config.toml) so the
+	-- new pane lives inside the Herdr session. A WezTerm split would spawn
+	-- default_prog, a bare PowerShell outside Herdr. Same pattern as ctrl+t.
+	{
+		key = "\\",
+		mods = "LEADER",
+		action = act.Multiple({ act.SendKey({ key = ";", mods = "CTRL" }), act.SendKey({ key = "\\" }) }),
+	},
+	{
+		key = "-",
+		mods = "LEADER",
+		action = act.Multiple({ act.SendKey({ key = ";", mods = "CTRL" }), act.SendKey({ key = "-" }) }),
+	},
+	-- Close passes through to Herdr's close_pane for the same reason; a WezTerm
+	-- close would kill the pane hosting Herdr, taking the whole session with it.
+	{
+		key = "x",
+		mods = "LEADER",
+		action = act.Multiple({ act.SendKey({ key = ";", mods = "CTRL" }), act.SendKey({ key = "x" }) }),
+	},
 	{ key = "z", mods = "LEADER", action = act.TogglePaneZoomState },
 
 	{ key = "LeftArrow", mods = "ALT", action = act.ActivatePaneDirection("Left") },

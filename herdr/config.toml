@@ -177,9 +177,8 @@ copy_mode = "prefix+v"
 
 # Splits.
 #
-# These intentionally mirror wezterm.lua's leader bindings (leader+\ and
-# leader+-) so the same two keys split a pane whether or not Herdr is the
-# thing handling it.
+# wezterm.lua's leader+\ and leader+- send these keys, so ctrl+a \ and
+# ctrl+a - split inside Herdr rather than spawning a bare WezTerm pane.
 # Defaults: "prefix+v" / "prefix+minus".
 split_vertical = "prefix+backslash"
 split_horizontal = "prefix+minus"
