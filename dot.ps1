@@ -40,6 +40,7 @@ $script:HerdrConfig     = Join-Path $script:RepoRoot 'herdr\config.toml'
 $script:LiveHerdrConfig = Join-Path $env:APPDATA 'herdr\config.toml'
 $script:ShadowWez       = Join-Path $env:USERPROFILE '.wezterm.lua'
 $script:LazyLock        = Join-Path $script:RepoRoot 'nvim\lazy-lock.json'
+$script:PwshProfile     = Join-Path $script:RepoRoot 'powershell\profile.ps1'
 
 $script:FailedPackages = @()
 $script:Failures       = 0
@@ -274,6 +275,21 @@ function Set-HerdrConfigPath {
     return $true
 }
 
+# $PROFILE is a file under OneDrive\Documents, not a directory, so it gets a
+# dot-source line pointing at the repo rather than a junction.
+function Set-PowerShellProfile {
+    $line = ". `"$script:PwshProfile`""
+    if ((Test-Path $PROFILE) -and (Select-String -Path $PROFILE -SimpleMatch $script:PwshProfile -Quiet)) {
+        Write-Ok 'PowerShell profile already sources the repo'
+        return $true
+    }
+    $parent = Split-Path -Parent $PROFILE
+    if (-not (Test-Path $parent)) { New-Item -ItemType Directory -Path $parent -Force | Out-Null }
+    Add-Content -Path $PROFILE -Encoding utf8 -Value $line
+    Write-Ok "PowerShell profile -> $script:PwshProfile"
+    return $true
+}
+
 function Install-Herdr {
     Write-Step 'herdr'
     if (Test-Command 'herdr') {
@@ -392,6 +408,7 @@ function Invoke-Link {
     if (-not (Set-RepoJunction -LinkPath $script:WezLink  -TargetPath $script:WezTarget  -Label 'wezterm')) { $ok = $false }
     if (-not (Set-RepoJunction -LinkPath $script:NvimLink -TargetPath $script:NvimTarget -Label 'nvim'))    { $ok = $false }
     if (-not (Set-HerdrConfigPath)) { $ok = $false }
+    if (-not (Set-PowerShellProfile)) { $ok = $false }
 
     # A ~/.wezterm.lua outranks ~/.config/wezterm, so it silently wins.
     if (Test-Path $script:ShadowWez) {
