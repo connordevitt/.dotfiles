@@ -1,0 +1,35 @@
+# Sourced from ~/.bashrc by `dot.ps1 link`. dmmulroy's shell config is zsh;
+# Git Bash is the Windows stand-in, so readline does the line editing.
+
+# Non-interactive shells have no line editor to bind.
+[[ $- == *i* ]] || return
+
+# Auto-pair quotes like nvim-autopairs: type the closing quote to step over it,
+# no pairing right after a word character (don't), Backspace eats an empty pair.
+__autopair_quote() {
+	local q=$1 l=$READLINE_LINE p=$READLINE_POINT
+	if [[ ${l:p:1} == "$q" ]]; then
+		READLINE_POINT=$((p + 1))
+	elif ((p > 0)) && [[ ${l:p-1:1} == [[:alnum:]_] ]]; then
+		READLINE_LINE=${l:0:p}$q${l:p}
+		READLINE_POINT=$((p + 1))
+	else
+		READLINE_LINE=${l:0:p}$q$q${l:p}
+		READLINE_POINT=$((p + 1))
+	fi
+}
+
+__autopair_backspace() {
+	local l=$READLINE_LINE p=$READLINE_POINT
+	((p > 0)) || return 0
+	if [[ ${l:p-1:1} == [\"\'] && ${l:p:1} == "${l:p-1:1}" ]]; then
+		READLINE_LINE=${l:0:p-1}${l:p+1}
+	else
+		READLINE_LINE=${l:0:p-1}${l:p}
+	fi
+	READLINE_POINT=$((p - 1))
+}
+
+bind -x '"\"": __autopair_quote "\""'
+bind -x "\"'\": __autopair_quote \"'\""
+bind -x '"\C-?": __autopair_backspace'

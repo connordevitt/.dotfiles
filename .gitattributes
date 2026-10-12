@@ -1,0 +1,2 @@
+# Bash rejects CRLF, and core.autocrlf would check these out with it.
+bash/** text eol=lf

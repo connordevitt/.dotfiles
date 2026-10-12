@@ -99,9 +99,12 @@ wezterm.on("update-right-status", function(window, pane)
 	}))
 end)
 
-config.default_prog = { "powershell.exe", "-NoLogo" }
+-- Git Bash, the closest Windows gets to dmmulroy's POSIX shell. -l so
+-- ~/.bash_profile runs, matching a macOS login shell.
+config.default_prog = { "C:/Program Files/Git/bin/bash.exe", "-l" }
 
 config.launch_menu = {
+	{ label = "Git Bash", args = { "C:/Program Files/Git/bin/bash.exe", "-l" } },
 	{ label = "PowerShell", args = { "powershell.exe", "-NoLogo" } },
 	{ label = "Command Prompt", args = { "cmd.exe" } },
 	{ label = "WSL", args = { "wsl.exe", "--cd", "~" } },
@@ -172,7 +175,7 @@ config.keys = {
 
 -- Leader + key becomes Herdr prefix + key, so ctrl+a drives dmmulroy's Herdr
 -- bindings. Splits and close must go to Herdr: a WezTerm split spawns a bare
--- PowerShell outside Herdr, and a WezTerm close kills Herdr's host pane.
+-- shell outside Herdr, and a WezTerm close kills Herdr's host pane.
 -- r and z stay WezTerm's (rename tab, zoom) above.
 for _, key in ipairs({
 	"\\",

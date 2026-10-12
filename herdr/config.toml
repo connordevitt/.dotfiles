@@ -69,10 +69,10 @@ peach = "#fab387"
 
 [terminal]
 # Executable used for new interactive panes. Empty uses $SHELL, then /bin/sh.
-# Windows: PowerShell 5.1 ships with the OS. If PowerShell 7 is installed
-# later, change this to "pwsh.exe".
+# Windows: Git Bash, matching WezTerm's default_prog. Use "powershell.exe"
+# to go back to PowerShell.
 # Default: "".
-default_shell = "powershell.exe"
+default_shell = "C:/Program Files/Git/bin/bash.exe"
 
 # New-shell startup mode: "auto", "login", or "non_login". Auto uses login
 # shells on macOS and non-login behavior elsewhere, which is correct here.

@@ -41,6 +41,7 @@ $script:LiveHerdrConfig = Join-Path $env:APPDATA 'herdr\config.toml'
 $script:ShadowWez       = Join-Path $env:USERPROFILE '.wezterm.lua'
 $script:LazyLock        = Join-Path $script:RepoRoot 'nvim\lazy-lock.json'
 $script:PwshProfile     = Join-Path $script:RepoRoot 'powershell\profile.ps1'
+$script:BashRc          = Join-Path $script:RepoRoot 'bash\bashrc'
 
 $script:FailedPackages = @()
 $script:Failures       = 0
@@ -290,6 +291,30 @@ function Set-PowerShellProfile {
     return $true
 }
 
+# Git Bash reads ~/.bashrc, so it gets a source line like $PROFILE does. Bash
+# chokes on a BOM, which PS 5.1's Add-Content -Encoding utf8 writes, hence
+# AppendAllText. WezTerm starts a login shell, which reads only
+# ~/.bash_profile, so that one sources ~/.bashrc.
+function Set-BashRc {
+    $noBom = New-Object System.Text.UTF8Encoding $false
+    $bashProfile = Join-Path $env:USERPROFILE '.bash_profile'
+    if (-not (Test-Path $bashProfile)) {
+        [IO.File]::AppendAllText($bashProfile, "[ -f ~/.bashrc ] && . ~/.bashrc`n", $noBom)
+        Write-Ok '~/.bash_profile -> ~/.bashrc'
+    }
+
+    $bashrc = Join-Path $env:USERPROFILE '.bashrc'
+    # C:\x\y -> /c/x/y, the path Git Bash understands.
+    $posix = '/' + $script:BashRc.Substring(0, 1).ToLowerInvariant() + $script:BashRc.Substring(2).Replace('\', '/')
+    if ((Test-Path $bashrc) -and (Select-String -Path $bashrc -SimpleMatch $posix -Quiet)) {
+        Write-Ok '~/.bashrc already sources the repo'
+        return $true
+    }
+    [IO.File]::AppendAllText($bashrc, ". `"$posix`"`n", $noBom)
+    Write-Ok "~/.bashrc -> $posix"
+    return $true
+}
+
 function Install-Herdr {
     Write-Step 'herdr'
     if (Test-Command 'herdr') {
@@ -409,6 +434,7 @@ function Invoke-Link {
     if (-not (Set-RepoJunction -LinkPath $script:NvimLink -TargetPath $script:NvimTarget -Label 'nvim'))    { $ok = $false }
     if (-not (Set-HerdrConfigPath)) { $ok = $false }
     if (-not (Set-PowerShellProfile)) { $ok = $false }
+    if (-not (Set-BashRc)) { $ok = $false }
 
     # A ~/.wezterm.lua outranks ~/.config/wezterm, so it silently wins.
     if (Test-Path $script:ShadowWez) {

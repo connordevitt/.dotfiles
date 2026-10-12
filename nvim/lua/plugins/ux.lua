@@ -119,6 +119,7 @@ return {
   {
     'laytan/cloak.nvim',
     event = { 'BufReadPre', 'BufNewFile' },
+    cmd = { 'CloakToggle', 'CloakEnable', 'CloakDisable', 'CloakPreviewLine' },
     opts = {
       patterns = {
         { file_pattern = '**/*.env*', cloak_pattern = '=.+' },
