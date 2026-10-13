@@ -16,3 +16,6 @@ nvim/.luarc.json
 
 # local agent instructions, not part of the terminal config
 agents.md
+
+# herdr updates
+herdr/release-notes.json
