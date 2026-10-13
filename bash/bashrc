@@ -1,4 +1,4 @@
-# Sourced from ~/.bashrc by `dot.ps1 link`. dmmulroy's shell config is zsh;
+# Sourced from ~/.bashrc by `dot.ps1 link`. dmmulroy's shell config is fish;
 # Git Bash is the Windows stand-in, so readline does the line editing.
 
 # Non-interactive shells have no line editor to bind.

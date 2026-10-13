@@ -74,8 +74,6 @@ dotfiles/
 ├── dot.ps1                # bootstrap + maintenance CLI
 ├── bash/
 │   └── bashrc             # Git Bash: quote auto-pairing (sourced by ~/.bashrc)
-├── powershell/
-│   └── profile.ps1        # same auto-pairing for PowerShell (sourced by $PROFILE)
 ├── packages/
 │   └── winget.txt         # winget package IDs, one per line
 ├── herdr/
@@ -116,7 +114,7 @@ idempotent, and none of them need elevation.
 | `init` | Install packages, link configs, verify. The one-command setup. |
 | `install` | Install the winget packages listed in `packages/winget.txt`. |
 | `agents` | Install the agent CLIs: Claude Code and Codex. |
-| `link` | Create the junctions, set `HERDR_CONFIG_PATH`, and source the shell profiles from `~/.bashrc` and `$PROFILE`. |
+| `link` | Create the junctions, set `HERDR_CONFIG_PATH`, and source `bash/bashrc` from `~/.bashrc`. |
 | `unlink` | Remove the junctions and clear `HERDR_CONFIG_PATH`. |
 | `doctor` | Diagnose the environment. Exits non-zero if anything failed. |
 | `update` | `git pull`, upgrade packages, re-link, verify. |
@@ -195,9 +193,8 @@ dmmulroy's fish. Herdr and Neovim's `:terminal` use it too. The launcher
 
 `bash/bashrc` adds one thing: quotes auto-pair like nvim-autopairs. Typing the
 closing quote steps over it, a quote right after a letter (`don't`) is left
-single, and Backspace inside an empty pair deletes both. `powershell/profile.ps1`
-does the same for PowerShell. `dot.ps1 link` wires both up, and creates a
-`~/.bash_profile` that sources `~/.bashrc`, since WezTerm's login shell reads
+single, and Backspace inside an empty pair deletes both. `dot.ps1 link` sources
+it from `~/.bashrc`, and creates a `~/.bash_profile` that sources `~/.bashrc`, since WezTerm's login shell reads
 only the former.
 
 ### Keybindings

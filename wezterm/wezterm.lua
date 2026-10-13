@@ -122,7 +122,7 @@ end
 
 config.keys = {
 	-- Ctrl+a twice sends a real Ctrl+a, which the leader otherwise swallows
-	-- (nvim increment, PowerShell select-all). dmmulroy uses Ghostty with no
+	-- (nvim increment, bash start-of-line). dmmulroy uses Ghostty with no
 	-- leader, so there is nothing of his to mirror here.
 	{ key = "a", mods = "LEADER|CTRL", action = act.SendKey({ key = "a", mods = "CTRL" }) },
 	{ key = "z", mods = "LEADER", action = act.TogglePaneZoomState },
@@ -142,7 +142,7 @@ config.keys = {
 	{ key = "t", mods = "CTRL", action = herdr("c") },
 	-- Cycle Herdr panes (cycle_pane_next = prefix+tab), tap until you land.
 	-- result with two side-by-side panes, but it wraps, and nvim never sees
-	-- ctrl+l. Also costs PowerShell's clear-screen.
+	-- ctrl+l. Also costs bash's clear-screen.
 	{ key = "l", mods = "CTRL", action = herdr("Tab") },
 	{ key = "w", mods = "CTRL|SHIFT", action = act.CloseCurrentTab({ confirm = false }) },
 	{ key = "Tab", mods = "CTRL", action = act.ActivateTabRelative(1) },
