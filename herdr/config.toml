@@ -37,9 +37,10 @@ accent = "#a6e3a1"
 panel_bg = "#1e1e2e"
 # Desktop sidebar background, independent of other panel surfaces.
 # sidebar_bg = "#181825"
-# NOTE: active_row_bg and selection_bg appear in Herdr's published config
-# reference but are rejected by 0.8.0-preview.2026-08-04. Left out until the
-# installed build accepts them; verify with `herdr config check`.
+# Background of the active Space and focused Agent sidebar rows.
+# active_row_bg = "#313244"
+# Background of the Navigate-mode cursor row in the sidebar.
+# selection_bg = "#45475a"
 # Lowest elevated surface color.
 surface0 = "#313244"
 # Higher elevated surface color.
@@ -287,8 +288,10 @@ agent_panel_sort = "priority"
 # Default: false.
 show_agent_labels_on_pane_borders = false
 
-# NOTE: ui.status_indicators is documented upstream but not recognised by
-# 0.8.0-preview.2026-08-04. Re-add once the installed build supports it.
+# Agent-state markers: "dots" uses compact colored marks; "symbols" uses
+# distinct static glyphs for blocked, working, done, idle, and unknown states.
+# Default: "dots".
+status_indicators = "symbols"
 
 # -----------------------------------------------------------------------------
 # Notifications

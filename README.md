@@ -70,7 +70,12 @@ Prefer to do it by hand? See [Manual setup](#manual-setup).
 dotfiles/
 ├── README.md
 ├── .gitignore
+├── .gitattributes         # keeps bash/ LF, since autocrlf would break it
 ├── dot.ps1                # bootstrap + maintenance CLI
+├── bash/
+│   └── bashrc             # Git Bash: quote auto-pairing (sourced by ~/.bashrc)
+├── powershell/
+│   └── profile.ps1        # same auto-pairing for PowerShell (sourced by $PROFILE)
 ├── packages/
 │   └── winget.txt         # winget package IDs, one per line
 ├── herdr/
@@ -111,7 +116,7 @@ idempotent, and none of them need elevation.
 | `init` | Install packages, link configs, verify. The one-command setup. |
 | `install` | Install the winget packages listed in `packages/winget.txt`. |
 | `agents` | Install the agent CLIs: Claude Code and Codex. |
-| `link` | Create the junctions and set `HERDR_CONFIG_PATH`. |
+| `link` | Create the junctions, set `HERDR_CONFIG_PATH`, and source the shell profiles from `~/.bashrc` and `$PROFILE`. |
 | `unlink` | Remove the junctions and clear `HERDR_CONFIG_PATH`. |
 | `doctor` | Diagnose the environment. Exits non-zero if anything failed. |
 | `update` | `git pull`, upgrade packages, re-link, verify. |
@@ -178,14 +183,22 @@ obvious at a glance. Scrollback is 10,000 lines and the audible bell is off.
 The tab bar uses the retro renderer rather than the fancy one, because the
 retro bar is fully themable from Lua. Tabs are drawn as powerline segments
 with hard dividers, and each tab shows an icon chosen from the process
-running in it: PowerShell, cmd, git, vim, WSL, node, python, ssh.
+running in it: bash, PowerShell, cmd, git, vim, WSL, node, python, ssh.
 
 The right status line shows the current directory and a clock.
 
 ### Shells
 
-`powershell.exe -NoLogo` is the default. The launcher (`Ctrl+a` then `l`)
-offers PowerShell, Command Prompt, and WSL.
+Git Bash (`bash.exe -l`) is the default, the closest Windows gets to
+dmmulroy's fish. Herdr and Neovim's `:terminal` use it too. The launcher
+(`Ctrl+a` then `l`) offers Git Bash, PowerShell, Command Prompt, and WSL.
+
+`bash/bashrc` adds one thing: quotes auto-pair like nvim-autopairs. Typing the
+closing quote steps over it, a quote right after a letter (`don't`) is left
+single, and Backspace inside an empty pair deletes both. `powershell/profile.ps1`
+does the same for PowerShell. `dot.ps1 link` wires both up, and creates a
+`~/.bash_profile` that sources `~/.bashrc`, since WezTerm's login shell reads
+only the former.
 
 ### Keybindings
 
@@ -196,7 +209,7 @@ Leader is `Ctrl+a`, pressed before the listed key.
 | `Leader` + Herdr key | Sent to Herdr as `Ctrl+;` + key (see [Herdr keybindings](#keybindings-1)) |
 | `Leader` + `z` | Zoom / unzoom WezTerm pane |
 | `Leader` + `r` | Rename current WezTerm tab |
-| `Leader` + `Ctrl+a` | Send a real `Ctrl+a` (nvim increment, PowerShell select-all) |
+| `Leader` + `Ctrl+a` | Send a real `Ctrl+a` (nvim increment, bash start-of-line) |
 | `Alt` + arrows | Move between panes |
 | `Alt`+`Shift` + arrows | Resize pane |
 | `Ctrl`+`Shift` + `M` / `W` | New / close tab |
@@ -325,8 +338,8 @@ with `Ctrl`+`Tab` and open with `Ctrl`+`Shift`+`M`.
 Adapted from [dmmulroy's Herdr config](https://github.com/dmmulroy/.dotfiles),
 with these deliberate changes for this machine:
 
-- **Shell.** `fish` becomes `powershell.exe`. Change it to `pwsh.exe` if
-  PowerShell 7 is ever installed.
+- **Shell.** `fish` becomes Git Bash (`C:/Program Files/Git/bin/bash.exe`),
+  matching WezTerm.
 - **Palette.** His uses Catppuccin **Macchiato**, and Herdr's bundled
   catppuccin theme is Macchiato too. Overridden to **Mocha** to match
   `wezterm.lua`, since a Macchiato panel inside a Mocha terminal reads as a
@@ -339,9 +352,7 @@ with these deliberate changes for this machine:
 - **Vim navigation.** His `ctrl+h/j/k/l` bindings are commented out here.
   They are `plugin_action` bindings requiring the `vim-herdr-navigation`
   plugin, which is not installed.
-- **Omitted keys.** `theme.custom.active_row_bg`, `theme.custom.selection_bg`,
-  and `ui.status_indicators` are in Herdr's published reference but rejected by
-  the installed `0.8.0-preview.2026-08-04` build. Left out with notes inline.
+- **No plugins.** His Annotate plugin and its keys are left out.
 
 ### Verifying
 
@@ -507,8 +518,8 @@ Turn it off when a reformat would bury a real diff:
 Three things about this config exist only because it runs on Windows:
 
 - **Shell.** `:terminal` and `:!` default to `cmd.exe`. `options.lua` repoints
-  them at `pwsh` (falling back to `powershell`) with UTF-8 forced on both
-  encodings, otherwise output arrives mojibaked.
+  them at Git Bash by full, quoted path: `'shell'` splits on spaces, and a bare
+  `bash` can resolve to `System32\bash.exe`, which is WSL.
 - **Treesitter needs a C compiler.** Parsers are compiled from source on
   install, and Windows ships without one. `zig` is installed via winget and
   nvim-treesitter picks it up off `PATH` automatically. That is the whole
@@ -662,11 +673,19 @@ understanding the wiring matters more than the script that applies it.
      'User')
    ```
 
-6. Launch WezTerm, or press `Ctrl+Shift+R` in a running window.
-7. Run `nvim`. lazy.nvim clones itself, installs every plugin, and Mason pulls
+6. Source the shell profile from Git Bash, and have login shells read
+   `~/.bashrc`:
+
+   ```bash
+   echo '. "/c/Repositorys/dotfiles/bash/bashrc"' >> ~/.bashrc
+   echo '[ -f ~/.bashrc ] && . ~/.bashrc' >> ~/.bash_profile
+   ```
+
+7. Launch WezTerm, or press `Ctrl+Shift+R` in a running window.
+8. Run `nvim`. lazy.nvim clones itself, installs every plugin, and Mason pulls
    the language servers. This takes a minute or two and happens exactly once.
    Treesitter parsers compile in the background afterwards.
-8. Confirm it all took: `.\dot.ps1 doctor`.
+9. Confirm it all took: `.\dot.ps1 doctor`.
 
 Verify the config is the one being loaded:
 
@@ -735,6 +754,17 @@ error plainly.
 The shell predates the install. Processes inherit `PATH` at launch, so a
 terminal opened before winget installed Neovim will never see it. Open a new
 tab or window.
+
+**Herdr still runs the old version after `herdr update`.**
+The installer puts a versioned folder on `PATH`, and WezTerm hands every new tab
+the `PATH` it launched with. `herdr` in any tab finds the old binary and starts
+an old server. Run `herdr server stop`, quit WezTerm entirely (every window),
+reopen it and run `herdr`. `herdr status server` should show the new version.
+
+**Quotes don't auto-pair in bash.**
+`~/.bashrc` isn't sourcing the repo. `bind -X | grep autopair` prints nothing in
+that case; re-run `.\dot.ps1 link`. A file with CRLF line endings fails the same
+way, which `.gitattributes` prevents.
 
 **`:TSInstall` fails with "no C compiler found".**
 zig has fallen off `PATH`. winget installs it under
