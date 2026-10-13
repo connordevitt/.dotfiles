@@ -62,15 +62,14 @@ opt.completeopt = { 'menu', 'menuone', 'noselect' }
 opt.confirm = true -- prompt instead of failing on unsaved quit
 opt.splitkeep = 'screen'
 
--- Windows: PowerShell as :! and :terminal shell, in place of cmd.exe.
--- pwsh (7+) is preferred and falls back to the bundled Windows PowerShell.
+-- Windows: Git Bash as :! and :terminal shell, in place of cmd.exe, matching
+-- WezTerm and Herdr. Quoted because 'shell' splits on spaces; the full path
+-- avoids System32\bash.exe, which is WSL.
 if vim.fn.has 'win32' == 1 then
-  local pwsh = vim.fn.executable 'pwsh' == 1 and 'pwsh' or 'powershell'
-  vim.opt.shell = pwsh
-  vim.opt.shellcmdflag =
-    '-NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command [Console]::InputEncoding=[Console]::OutputEncoding=[System.Text.Encoding]::UTF8;'
-  vim.opt.shellredir = '2>&1 | Out-File -Encoding UTF8 %s; exit $LastExitCode'
-  vim.opt.shellpipe = '2>&1 | Out-File -Encoding UTF8 %s; exit $LastExitCode'
+  vim.opt.shell = '"C:/Program Files/Git/bin/bash.exe"'
+  vim.opt.shellcmdflag = '-c'
+  vim.opt.shellredir = '>%s 2>&1'
+  vim.opt.shellpipe = '2>&1 | tee'
   vim.opt.shellquote = ''
   vim.opt.shellxquote = ''
 end
