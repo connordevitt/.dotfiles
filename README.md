@@ -794,7 +794,3 @@ to Neovim's own file listing, so this shows up as grep alone being broken.
 Format on save, with a formatter whose style disagrees with the file.
 `:FormatDisable!` turns it off for the current buffer, and `:ConformInfo` names
 the formatter that ran.
-
-## Acknowledgments
-
-README structure inspired by [dmmulroy/.dotfiles](https://github.com/dmmulroy/.dotfiles).
