@@ -94,6 +94,7 @@ dotfiles/
 │           ├── telescope.lua  # fuzzy finder
 │           ├── treesitter.lua # parsers, text objects
 │           ├── lsp.lua        # servers, diagnostics, LSP keymaps
+│           ├── typescript-tools.lua # TS/JS server, inlay hints
 │           ├── completion.lua # blink.cmp
 │           └── format.lua     # conform.nvim, format on save
 └── wezterm/
@@ -413,6 +414,8 @@ against whatever is showing through.
 | telescope | Fuzzy finder for files, grep, buffers, LSP symbols |
 | nvim-treesitter | Parser-driven highlighting, indentation, text objects |
 | nvim-lspconfig + mason | Language servers, downloaded on demand |
+| typescript-tools | TypeScript/JavaScript server, talks to tsserver directly |
+| twoslash-queries | `// ^?` under a variable shows its type inline |
 | blink.cmp | Completion; prebuilt Rust matcher, nothing to compile |
 | conform.nvim | Formatting, including format on save |
 | mason-tool-installer | Installs the formatters Mason's LSP half ignores |
@@ -472,9 +475,19 @@ editor split and a terminal pane never fight over the same keystroke.
 
 Mason downloads server binaries into Neovim's data directory, so nothing is
 installed system-wide and nothing needs admin. `lua_ls`, `taplo`, `jsonls`,
-`yamlls`, `ts_ls`, `bashls`, and `marksman` are installed automatically on
-first launch. Between them they cover every file in this repo, including
+`yamlls`, `bashls`, and `marksman` are installed automatically on first launch.
+Between them they cover every file in this repo, including
 `herdr/config.toml`, which is otherwise unvalidated.
+
+TypeScript and JavaScript go through `typescript-tools.nvim` instead of `ts_ls`,
+mirroring upstream. It uses the `typescript` package in the project's
+`node_modules`, so a loose `.ts` file outside a project gets nothing unless
+TypeScript is installed globally (`npm i -g typescript`). It turns on every
+inlay hint (`<leader>ch` shows them), fills in arguments when completing a
+function, and publishes errors on leaving insert mode rather than per
+keystroke. Upstream's `separate_diagnostic_server` and 12GB
+`tsserver_max_memory` are left out: one tsserver is plenty here.
+`:TSToolsOrganizeImports` and `:TSToolsAddMissingImports` are also available.
 
 Configuration uses Neovim 0.11's native `vim.lsp.config` and `vim.lsp.enable`
 rather than the older `require('lspconfig').server.setup{}` pattern.
