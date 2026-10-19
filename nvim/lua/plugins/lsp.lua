@@ -130,7 +130,7 @@ return {
         'taplo', -- toml: herdr/config.toml, pyproject, Cargo
         'jsonls',
         'yamlls',
-        'ts_ls', -- javascript / typescript
+        -- javascript / typescript: typescript-tools.lua, not ts_ls
         'bashls',
         'marksman', -- markdown, including README.md
       }

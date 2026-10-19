@@ -19,3 +19,6 @@ agents.md
 
 # herdr updates
 herdr/release-notes.json
+herdr/session-snapshots/
+herdr/*.sock
+herdr/*.sock.*
