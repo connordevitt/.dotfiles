@@ -33,3 +33,8 @@ __autopair_backspace() {
 bind -x '"\"": __autopair_quote "\""'
 bind -x "\"'\": __autopair_quote \"'\""
 bind -x '"\C-?": __autopair_backspace'
+
+# A TUI that dies without cleanup (nvim, an agent CLI) leaves mouse tracking
+# on, and Herdr then forwards every mouse move into readline as junk like
+# [<35;12;5M. Switch every tracking mode back off before each prompt.
+PROMPT_COMMAND="printf '\e[?1000l\e[?1002l\e[?1003l\e[?1006l'${PROMPT_COMMAND:+;$PROMPT_COMMAND}"
