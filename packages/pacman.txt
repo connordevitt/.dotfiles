@@ -1,0 +1,16 @@
+# Core terminal and editor stack, installed by `./dot.sh install`.
+# One pacman package per line; blank lines and `#` comments are ignored.
+#
+# A stock Omarchy install already has all of these. The list exists so
+# `doctor` can prove it, and so a trimmed-down install can be topped up.
+# Agent CLIs are absent deliberately: they come from mise, via `./dot.sh agents`.
+
+neovim
+git             # runtime dependency: lazy.nvim fetches plugins with it
+tree-sitter-cli # nvim-treesitter (main branch) builds parsers with it
+gcc             # C compiler the tree-sitter CLI drives
+ripgrep         # telescope live_grep
+fd              # telescope find_files
+wl-clipboard    # clipboard=unnamedplus on Wayland goes through wl-copy
+foot            # terminal; Omarchy's default, and it themes it
+herdr           # from the omarchy repo

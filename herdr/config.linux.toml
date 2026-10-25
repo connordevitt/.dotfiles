@@ -1,0 +1,115 @@
+# Herdr configuration -- Linux (Omarchy)
+# Symlinked to ~/.config/herdr/config.toml by `./dot.sh link`.
+# Full reference: https://herdr.dev/docs/config-reference/
+#
+# The Windows twin is config.toml in this directory. Herdr takes one prefix
+# and has no include or per-platform mechanism, so the two files are separate.
+# Only active values live here; config.toml doubles as the commented reference.
+#
+# On Windows, WezTerm's ctrl+a leader translated keys into Herdr's ctrl+;
+# prefix. foot has no leader, so Herdr owns ctrl+a directly and the WezTerm
+# shortcuts (ctrl+t, ctrl+l, ctrl+1..9, alt+arrows) are bound here instead.
+# Keep the two files' bindings in step when changing one.
+
+onboarding = false
+
+[theme]
+name = "catppuccin"
+
+[theme.custom]
+# Catppuccin Mocha, matching nvim. Herdr's bundled catppuccin is Macchiato.
+accent = "#a6e3a1"
+panel_bg = "#1e1e2e"
+surface0 = "#313244"
+surface1 = "#45475a"
+surface_dim = "#181825"
+overlay0 = "#6c7086"
+overlay1 = "#7f849c"
+text = "#cdd6f4"
+subtext0 = "#a6adc8"
+mauve = "#cba6f7"
+green = "#a6e3a1"
+yellow = "#f9e2af"
+red = "#f38ba8"
+blue = "#89b4fa"
+teal = "#94e2d5"
+peach = "#fab387"
+
+[terminal]
+# default_shell left unset: Herdr falls back to $SHELL, which is bash.
+new_cwd = "follow"
+
+[update]
+# pacman owns the herdr package; Herdr's own update nag would fight it.
+version_check = false
+
+[keys]
+# ctrl+a: the WezTerm leader on Windows, now Herdr's own prefix. It costs a
+# literal ctrl+a (bash start-of-line, nvim increment); Home still works.
+prefix = "ctrl+a"
+
+settings = "prefix+shift+s"
+workspace_picker = ["prefix+s", "prefix+w"]
+detach = ["prefix+d", "prefix+q"]
+reload_config = "prefix+r"
+previous_workspace = "prefix+("
+next_workspace = "prefix+)"
+
+# Jump to the agent that notified. i was dmmulroy's key, o is Herdr's.
+open_notification_target = ["prefix+o", "prefix+i"]
+
+# Agents by index. ctrl matches the Windows leader+ctrl+N.
+focus_agent = ["prefix+alt+1..9", "prefix+ctrl+1..9"]
+
+# Tabs. ctrl+t and ctrl+1..9 were WezTerm shortcuts on Windows.
+new_tab = ["prefix+c", "ctrl+t"]
+switch_tab = ["alt+1..9", "ctrl+1..9"]
+rename_tab = "prefix+comma"
+
+# Panes. ctrl+l cycles panes, as on Windows; it costs bash's clear-screen.
+cycle_pane_next = ["prefix+tab", "ctrl+l"]
+copy_mode = "prefix+v"
+split_vertical = "prefix+backslash"
+split_horizontal = "prefix+minus"
+zoom = ["prefix+m", "prefix+z"]
+resize_mode = "prefix+shift+r"
+
+# alt+arrows and alt+shift+arrows drove WezTerm panes on Windows.
+focus_pane_left = ["prefix+h", "alt+left"]
+focus_pane_down = ["prefix+j", "alt+down"]
+focus_pane_up = ["prefix+k", "alt+up"]
+focus_pane_right = ["prefix+l", "alt+right"]
+resize_pane_left = "alt+shift+left"
+resize_pane_down = "alt+shift+down"
+resize_pane_up = "alt+shift+up"
+resize_pane_right = "alt+shift+right"
+
+[ui]
+sidebar_width = 32
+right_click_passthrough_modifier = "ctrl"
+confirm_close = false
+prompt_new_workspace_name = true
+accent = "#a6e3a1"
+agent_panel_sort = "priority"
+show_agent_labels_on_pane_borders = false
+status_indicators = "symbols"
+# Matches Omarchy's config, so Hyprland's group bar names the workspace.
+window_title = "{hostname}: {workspace}"
+
+[ui.toast]
+delivery = "herdr"
+
+[ui.toast.herdr]
+position = "top-right"
+
+[ui.sound]
+enabled = false
+
+[advanced]
+# 50 MiB.
+scrollback_limit_bytes = 52428800
+
+[experimental]
+# kitty_graphics stays off: foot speaks sixel, not the Kitty protocol.
+# NOTE: saved output may contain secrets. Disable if that matters to you.
+pane_history = true

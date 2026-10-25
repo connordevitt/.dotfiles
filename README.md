@@ -4,6 +4,10 @@ A Windows terminal environment built around [WezTerm](https://wezfurlong.org/wez
 and [Neovim](https://neovim.io/), kept under version control and installed onto
 a fresh machine with one command.
 
+It also runs on Linux under [Omarchy](https://omarchy.org/), where foot
+replaces WezTerm and `dot.sh` replaces `dot.ps1`. See
+[Linux (Omarchy)](#linux-omarchy).
+
 ## Overview
 
 WezTerm is configured entirely in Lua. There is no settings GUI and no JSON
@@ -70,14 +74,17 @@ Prefer to do it by hand? See [Manual setup](#manual-setup).
 dotfiles/
 ├── README.md
 ├── .gitignore
-├── .gitattributes         # keeps bash/ LF, since autocrlf would break it
-├── dot.ps1                # bootstrap + maintenance CLI
+├── .gitattributes         # keeps bash/ and *.sh LF, since autocrlf would break them
+├── dot.ps1                # bootstrap + maintenance CLI (Windows)
+├── dot.sh                 # the same CLI for Linux (Omarchy)
 ├── bash/
 │   └── bashrc             # Git Bash: quote auto-pairing (sourced by ~/.bashrc)
 ├── packages/
-│   └── winget.txt         # winget package IDs, one per line
+│   ├── winget.txt         # winget package IDs, one per line
+│   └── pacman.txt         # pacman packages for Omarchy
 ├── herdr/
-│   └── config.toml        # Herdr multiplexer: theme, keys, agent panel
+│   ├── config.toml        # Herdr multiplexer: theme, keys, agent panel (Windows)
+│   └── config.linux.toml  # the same, with WezTerm's shortcuts folded in
 ├── nvim/
 │   ├── init.lua           # entry point: three requires, load order matters
 │   ├── lazy-lock.json     # pinned plugin commits, tracked on purpose
@@ -157,6 +164,48 @@ and Herdr is not packaged for Windows at all. `dot.ps1` prints the exact
 command and asks before running Herdr's, rather than piping a third-party
 script into your shell on your behalf. `-Yes` skips the prompt if you would
 rather it did not ask.
+
+## Linux (Omarchy)
+
+Omarchy already ships most of the stack, so the Linux side is mostly linking.
+
+```bash
+git clone https://github.com/connordevitt/dotfiles.git ~/Work/dotfiles
+cd ~/Work/dotfiles
+./dot.sh init
+```
+
+`dot.sh` has the same commands as `dot.ps1` (`init`, `install`, `agents`,
+`link`, `unlink`, `doctor`, `update`, `check-packages`), with flags spelled
+`--with-agents`, `--skip-install` and `--yes`.
+
+| What | Windows | Omarchy |
+| --- | --- | --- |
+| Terminal | WezTerm, `wezterm/wezterm.lua` | foot, configured and themed by Omarchy |
+| Neovim | junction at `%LOCALAPPDATA%\nvim` | symlink at `~/.config/nvim` |
+| Herdr | `HERDR_CONFIG_PATH` → `herdr/config.toml` | symlink `~/.config/herdr/config.toml` → `herdr/config.linux.toml` |
+| Shell | Git Bash, `bash/bashrc` sourced from `~/.bashrc` | bash, same line appended after Omarchy's rc |
+| Packages | winget, `packages/winget.txt` | pacman, `packages/pacman.txt` |
+| Agent CLIs | install scripts / winget | mise, as Omarchy does |
+
+Notes:
+
+- **Omarchy's configs are backed up first.** `link` moves the existing
+  `~/.config/nvim` and Herdr `config.toml` aside as `*.bak-<timestamp>` before
+  linking, and `unlink` puts the newest backup back.
+- **Herdr gets its own file on Linux.** Herdr takes one prefix and has no
+  per-platform config. On Windows, WezTerm's `ctrl+a` leader translated keys
+  into Herdr's `ctrl+;`. foot has no leader, so `config.linux.toml` makes
+  `ctrl+a` Herdr's prefix and binds the shortcuts WezTerm used to send:
+  `ctrl+t` new tab, `ctrl+l` next pane, `ctrl+1..9` tabs, `alt+arrows` focus,
+  `alt+shift+arrows` resize, and `prefix+ctrl+1..9` agents. When you change a
+  binding, change it in both files.
+- **`update` doesn't upgrade packages.** Upgrading single packages is a partial
+  upgrade on Arch, so `update` only installs what is missing. `omarchy-update`
+  upgrades the system.
+- **`doctor` watches for `HERDR_CONFIG_PATH`.** If it is set, it outranks the
+  symlink. That is the Linux equivalent of a stray `.wezterm.lua`.
+- `SUPER+CTRL+RETURN` opens foot running Herdr.
 
 ## The WezTerm Config
 

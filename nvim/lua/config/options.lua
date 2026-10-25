@@ -57,7 +57,7 @@ opt.timeoutlen = 400 -- which-key popup delay
 opt.keymodel = { 'startsel', 'stopsel' }
 
 opt.mouse = 'a'
-opt.clipboard = 'unnamedplus' -- yank straight to the Windows clipboard
+opt.clipboard = 'unnamedplus' -- yank straight to the system clipboard (wl-copy on Wayland)
 opt.completeopt = { 'menu', 'menuone', 'noselect' }
 opt.confirm = true -- prompt instead of failing on unsaved quit
 opt.splitkeep = 'screen'
