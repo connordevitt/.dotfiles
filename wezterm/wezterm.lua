@@ -84,7 +84,28 @@ wezterm.on("format-tab-title", function(tab, _, _, _, hover, max_width)
 	}
 end)
 
+-- Herdr 0.9.x on Windows decodes mouse motion as typed keys when it starts in a
+-- window bigger than 80x24 (herdrdev/herdr#4907), so every herdr launch spews
+-- junk into panes. One resize after it starts clears it: bounce fullscreen
+-- whenever herdr takes over a pane. Windows-only; dmmulroy's Ghostty never hits it.
+-- ponytail: drop once #4907 ships a fix.
+local herdr_panes = {}
+local function unstick_herdr_mouse(window, pane)
+	local id = pane:pane_id()
+	local is_herdr = (pane:get_foreground_process_name() or ""):lower():find("herdr") ~= nil
+	if is_herdr and not herdr_panes[id] then
+		wezterm.time.call_after(1, function()
+			window:toggle_fullscreen()
+			wezterm.time.call_after(0.3, function()
+				window:toggle_fullscreen()
+			end)
+		end)
+	end
+	herdr_panes[id] = is_herdr
+end
+
 wezterm.on("update-right-status", function(window, pane)
+	unstick_herdr_mouse(window, pane)
 	local cwd = pane:get_current_working_dir()
 	local cwd_str = ""
 	if cwd then
@@ -118,6 +139,40 @@ config.leader = { key = "a", mods = "CTRL", timeout_milliseconds = 1000 }
 -- SendKey version carries the ';' character, which Herdr does decode.
 local function herdr(key, mods)
 	return act.Multiple({ act.SendKey({ key = ";", mods = "CTRL" }), act.SendKey({ key = key, mods = mods }) })
+end
+
+-- Tiling: snap window to screen halves or center. Windows grabs SUPER+Arrow
+-- for its own snap, so these use CTRL+ALT which is uncontested.
+-- ponytail: 48px taskbar; set to 0 for auto-hide taskbar.
+local function snap(pos)
+	return wezterm.action_callback(function(window, _)
+		local screen = wezterm.gui.screens().active
+		local x0, y0 = screen.x, screen.y
+		local sw, sh = screen.width, screen.height
+		local wh = sh - 48
+
+		if pos == "max" then
+			window:maximize()
+			return
+		end
+		if pos == "left" then
+			window:set_position(x0, y0)
+			window:set_inner_size(sw / 2, wh)
+		elseif pos == "right" then
+			window:set_position(x0 + sw / 2, y0)
+			window:set_inner_size(sw / 2, wh)
+		elseif pos == "top" then
+			window:set_position(x0, y0)
+			window:set_inner_size(sw, math.floor(wh / 2))
+		elseif pos == "bottom" then
+			window:set_position(x0, y0 + math.floor(wh / 2))
+			window:set_inner_size(sw, math.floor(wh / 2))
+		elseif pos == "center" then
+			local cw, ch = math.floor(sw * 0.6), math.floor(wh * 0.85)
+			window:set_position(x0 + math.floor((sw - cw) / 2), y0 + math.floor((wh - ch) / 2))
+			window:set_inner_size(cw, ch)
+		end
+	end)
 end
 
 config.keys = {
@@ -171,6 +226,14 @@ config.keys = {
 	{ key = "f", mods = "CTRL|SHIFT", action = act.Search({ CaseInSensitiveString = "" }) },
 
 	{ key = "F11", mods = "NONE", action = act.ToggleFullScreen },
+
+	-- Tiling WM: CTRL+ALT+Arrow snaps to half, Enter maximizes, C centers.
+	{ key = "Return", mods = "CTRL|ALT", action = snap("max") },
+	{ key = "LeftArrow", mods = "CTRL|ALT", action = snap("left") },
+	{ key = "RightArrow", mods = "CTRL|ALT", action = snap("right") },
+	{ key = "UpArrow", mods = "CTRL|ALT", action = snap("top") },
+	{ key = "DownArrow", mods = "CTRL|ALT", action = snap("bottom") },
+	{ key = "c", mods = "CTRL|ALT", action = snap("center") },
 }
 
 -- Leader + key becomes Herdr prefix + key, so ctrl+a drives dmmulroy's Herdr
