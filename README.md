@@ -8,6 +8,9 @@ It also runs on Linux under [Omarchy](https://omarchy.org/), where foot
 replaces WezTerm and `dot.sh` replaces `dot.ps1`. See
 [Linux (Omarchy)](#linux-omarchy).
 
+A **macOS port is in testing**, using [Ghostty](https://ghostty.org/) as the
+terminal and Homebrew for packages. See [macOS](#macos-in-testing).
+
 ## Overview
 
 WezTerm is configured entirely in Lua. There is no settings GUI and no JSON
@@ -77,11 +80,15 @@ dotfiles/
 ├── .gitattributes         # keeps bash/ and *.sh LF, since autocrlf would break them
 ├── dot.ps1                # bootstrap + maintenance CLI (Windows)
 ├── dot.sh                 # the same CLI for Linux (Omarchy)
+├── dot-mac.sh             # the same CLI for macOS (in testing)
 ├── bash/
 │   └── bashrc             # Git Bash: quote auto-pairing (sourced by ~/.bashrc)
+├── ghostty/
+│   └── config             # Ghostty terminal config (macOS, in testing)
 ├── packages/
 │   ├── winget.txt         # winget package IDs, one per line
-│   └── pacman.txt         # pacman packages for Omarchy
+│   ├── pacman.txt         # pacman packages for Omarchy
+│   └── Brewfile           # Homebrew packages for macOS
 ├── herdr/
 │   ├── config.toml        # Herdr multiplexer: theme, keys, agent panel (Windows)
 │   └── config.linux.toml  # the same, with WezTerm's shortcuts folded in
@@ -206,6 +213,45 @@ Notes:
 - **`doctor` watches for `HERDR_CONFIG_PATH`.** If it is set, it outranks the
   symlink. That is the Linux equivalent of a stray `.wezterm.lua`.
 - `SUPER+CTRL+RETURN` opens foot running Herdr.
+
+## macOS (in testing)
+
+> **This port is untested on real hardware.** The configs and bootstrap script
+> are written but have not been validated on a Mac yet. Expect rough edges.
+
+[Ghostty](https://ghostty.org/) replaces WezTerm, and Homebrew replaces winget.
+Neovim and Herdr carry over unchanged.
+
+```bash
+git clone https://github.com/connordevitt/dotfiles.git ~/dotfiles
+cd ~/dotfiles
+./dot-mac.sh init
+```
+
+`dot-mac.sh` has the same commands as the other bootstrap scripts (`init`,
+`install`, `link`, `unlink`, `doctor`, `update`).
+
+| What | Windows | macOS |
+| --- | --- | --- |
+| Terminal | WezTerm, `wezterm/wezterm.lua` | Ghostty, `ghostty/config` |
+| Neovim | junction at `%LOCALAPPDATA%\nvim` | symlink at `~/.config/nvim` |
+| Herdr | `HERDR_CONFIG_PATH` → `herdr/config.toml` | symlink at `~/.config/herdr` |
+| Packages | winget, `packages/winget.txt` | Homebrew, `packages/Brewfile` |
+| Bootstrap | `dot.ps1` | `dot-mac.sh` |
+
+Notes:
+
+- **Ghostty config mirrors the WezTerm aesthetic.** Catppuccin Mocha, JetBrains
+  Mono at 14pt (bumped from 11.5 for retina), 88% opacity, blinking bar cursor.
+  dmmulroy uses MonoLisa + Macchiato; we diverge on font and sub-theme as we do
+  on Windows.
+- **`macos-option-as-alt`** is on, so Option behaves like Alt in the terminal.
+- **No zig in the Brewfile.** Homebrew's neovim and tree-sitter handle
+  compilation natively on macOS.
+- **Herdr links the whole directory** (`~/.config/herdr`), not just the config
+  file. The `default_shell` in `herdr/config.toml` is a Windows path; on macOS
+  Herdr falls back to `$SHELL` when it's empty or invalid, which is the right
+  behaviour. A Mac-specific `config.toml` may be needed if this causes issues.
 
 ## The WezTerm Config
 
