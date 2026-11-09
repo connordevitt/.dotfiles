@@ -1,0 +1,11 @@
+# Core terminal and editor stack, installed by `./dot.sh install`.
+# Mac equivalent of packages/winget.txt. Run: brew bundle --file=packages/Brewfile
+
+brew "neovim"
+brew "git"
+brew "tree-sitter"
+brew "ripgrep"
+brew "fd"
+brew "stow"
+
+cask "ghostty"

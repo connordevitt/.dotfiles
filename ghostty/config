@@ -1,0 +1,35 @@
+# Ghostty configuration — macOS
+# Mirrors the aesthetic from wezterm/wezterm.lua (Catppuccin Mocha, JetBrains
+# Mono). dmmulroy uses MonoLisa + Macchiato; we diverge on font and sub-theme.
+
+font-family = JetBrains Mono
+font-size = 14
+adjust-cell-height = 15%
+
+theme = catppuccin-mocha
+
+cursor-style = bar
+cursor-style-blink = true
+
+background-opacity = 0.88
+unfocused-split-opacity = 0.9
+
+window-height = 32
+window-width = 120
+window-padding-x = 14
+window-padding-y = 10
+window-padding-balance = true
+window-save-state = always
+
+mouse-scroll-multiplier = 0.4
+
+clipboard-read = allow
+clipboard-write = allow
+
+quit-after-last-window-closed = true
+
+# macOS native fullscreen, not Ghostty's non-native mode.
+macos-non-native-fullscreen = false
+macos-option-as-alt = true
+
+shell-integration = detect
