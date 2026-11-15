@@ -54,7 +54,7 @@ configs, one repo, and no copies to keep in sync.
 ## Quick Start
 
 ```bash
-git clone https://github.com/connordevitt/dotfiles.git C:\Repositorys\dotfiles
+git clone https://github.com/connordevitt/.dotfiles.git C:\Repositorys\dotfiles
 ```
 
 ```powershell
@@ -68,6 +68,20 @@ health check. No administrator rights, and safe to re-run.
 
 Then open a **new** WezTerm window and run `nvim` once while plugins install.
 That is the entire setup.
+
+### Staying up to date
+
+Clone it, don't fork it. To pull the latest changes later:
+
+```powershell
+.\dot.ps1 update
+```
+
+`update` pulls with `git pull --rebase --autostash`, so your own tweaks,
+committed or not, are kept and replayed on top of what's new. Then it upgrades
+packages, re-links, and runs `doctor`. If one of your changes conflicts with an
+incoming one, it stops and tells you how to resolve or back out. On Linux and
+macOS it is `./dot.sh update` and `./dot-mac.sh update`.
 
 Prefer to do it by hand? See [Manual setup](#manual-setup).
 
@@ -132,7 +146,7 @@ idempotent, and none of them need elevation.
 | `link` | Create the junctions, set `HERDR_CONFIG_PATH`, and source `bash/bashrc` from `~/.bashrc`. |
 | `unlink` | Remove the junctions and clear `HERDR_CONFIG_PATH`. |
 | `doctor` | Diagnose the environment. Exits non-zero if anything failed. |
-| `update` | `git pull`, upgrade packages, re-link, verify. |
+| `update` | `git pull --rebase --autostash`, upgrade packages, re-link, verify. Local tweaks are kept on top, so a plain clone is enough — no fork needed. |
 | `check-packages` | Manifest versus what is actually installed. |
 
 | Flag | Effect |
@@ -177,7 +191,7 @@ rather it did not ask.
 Omarchy already ships most of the stack, so the Linux side is mostly linking.
 
 ```bash
-git clone https://github.com/connordevitt/dotfiles.git ~/Work/dotfiles
+git clone https://github.com/connordevitt/.dotfiles.git ~/Work/dotfiles
 cd ~/Work/dotfiles
 ./dot.sh init
 ```
@@ -223,7 +237,7 @@ Notes:
 Neovim and Herdr carry over unchanged.
 
 ```bash
-git clone https://github.com/connordevitt/dotfiles.git ~/dotfiles
+git clone https://github.com/connordevitt/.dotfiles.git ~/dotfiles
 cd ~/dotfiles
 ./dot-mac.sh init
 ```

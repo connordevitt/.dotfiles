@@ -614,9 +614,17 @@ function Invoke-Update {
     Write-Step 'git pull'
     Push-Location $script:RepoRoot
     try {
-        git pull --ff-only | Out-Host
+        # dmmulroy runs a plain `git pull`. --rebase --autostash goes further so
+        # a plain clone with local tweaks (committed or not) still updates:
+        # no fork needed just to keep personal changes.
+        git pull --rebase --autostash | Out-Host
         if ($LASTEXITCODE -eq 0) { Write-Ok 'repo up to date' }
-        else { Write-Warn 'git pull failed; uncommitted changes or a diverged branch?' }
+        else {
+            # Stop like his does; linking a half-rebased tree helps nobody.
+            Write-Fail 'git pull failed; your changes conflict with upstream.'
+            Write-Info 'resolve and `git rebase --continue`, or `git rebase --abort`, then re-run'
+            return 1
+        }
     } finally {
         Pop-Location
     }

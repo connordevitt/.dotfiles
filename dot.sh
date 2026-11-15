@@ -169,7 +169,16 @@ do_update() {
     header "Updating"
 
     step "git pull"
-    (cd "$REPO_ROOT" && git pull --ff-only) && ok "repo up to date" || warn "git pull failed"
+    # dmmulroy runs a plain `git pull`. --rebase --autostash goes further so a
+    # plain clone with local tweaks (committed or not) still updates: no fork
+    # needed just to keep personal changes.
+    if (cd "$REPO_ROOT" && git pull --rebase --autostash); then
+        ok "repo up to date"
+    else
+        fail "git pull failed; your changes conflict with upstream."
+        info "resolve and 'git rebase --continue', or 'git rebase --abort', then re-run"
+        return 1
+    fi
 
     step "brew upgrade"
     brew bundle --file="$BREWFILE"
