@@ -313,7 +313,7 @@ function Install-Herdr {
         return
     }
     try {
-        Invoke-RestMethod -Uri 'https://herdr.dev/install.ps1' | Invoke-Expression
+        Invoke-RestMethod -Uri 'https://herdr.dev/install.ps1' | Invoke-Expression | Out-Host
         Update-SessionPath
         if (Test-Command 'herdr') { Write-Ok 'herdr installed' }
         else { Write-Warn 'herdr installed but not on PATH yet; open a new shell' }
@@ -330,7 +330,7 @@ function Install-ClaudeCode {
     }
     Write-Info 'installing Claude Code from https://claude.ai/install.ps1'
     try {
-        Invoke-RestMethod -Uri 'https://claude.ai/install.ps1' | Invoke-Expression
+        Invoke-RestMethod -Uri 'https://claude.ai/install.ps1' | Invoke-Expression | Out-Host
         Update-SessionPath
         if (Test-Command 'claude') { Write-Ok 'claude installed' }
         else { Write-Warn 'claude installed but not on PATH yet; open a new shell' }

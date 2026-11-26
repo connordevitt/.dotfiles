@@ -196,8 +196,8 @@ config.keys = {
 
 	{ key = "t", mods = "CTRL", action = herdr("c") },
 	-- Cycle Herdr panes (cycle_pane_next = prefix+tab), tap until you land.
-	-- result with two side-by-side panes, but it wraps, and nvim never sees
-	-- ctrl+l. Also costs bash's clear-screen.
+	-- Only a true left/right with two side-by-side panes, but it wraps, and
+	-- nvim never sees ctrl+l. Also costs bash's clear-screen.
 	{ key = "l", mods = "CTRL", action = herdr("Tab") },
 	{ key = "w", mods = "CTRL|SHIFT", action = act.CloseCurrentTab({ confirm = false }) },
 	{ key = "Tab", mods = "CTRL", action = act.ActivateTabRelative(1) },

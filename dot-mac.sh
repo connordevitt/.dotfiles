@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # dot-mac.sh — macOS bootstrap and maintenance. Equivalent of dot.ps1 for Windows.
 # Everything is idempotent and needs no sudo (except Homebrew's own installer).
-set -euo pipefail
+# No -e: one failed link or check must not abort the rest of the run.
+set -uo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
 BREWFILE="$REPO_ROOT/packages/Brewfile"
@@ -67,20 +68,33 @@ do_install() {
         step "Homebrew"
         warn "brew not found — installing Homebrew"
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-        eval "$(/opt/homebrew/bin/brew shellenv)"
+        # Apple Silicon installs to /opt/homebrew, Intel to /usr/local.
+        for b in /opt/homebrew/bin/brew /usr/local/bin/brew; do
+            [ -x "$b" ] && eval "$("$b" shellenv)" && break
+        done
     fi
 
     step "Brewfile"
-    brew bundle --file="$BREWFILE"
-    ok "packages installed"
+    if brew bundle --file="$BREWFILE"; then ok "packages installed"; else fail "brew bundle failed"; return 1; fi
 }
 
 do_link() {
     header "Linking configs"
 
-    ensure_link "$REPO_ROOT/nvim"    "$HOME/.config/nvim"    "nvim"
-    ensure_link "$REPO_ROOT/ghostty" "$HOME/.config/ghostty" "ghostty"
-    ensure_link "$REPO_ROOT/herdr"   "$HOME/.config/herdr"   "herdr"
+    # Older versions linked the whole ~/.config/herdr dir, which put Herdr's
+    # runtime state in the repo and loaded the Windows config. Undo that.
+    if [ -L "$HOME/.config/herdr" ] && [ "$(readlink "$HOME/.config/herdr")" = "$REPO_ROOT/herdr" ]; then
+        rm "$HOME/.config/herdr"
+        info "removed old ~/.config/herdr directory symlink"
+    fi
+
+    local rc=0
+    ensure_link "$REPO_ROOT/nvim"    "$HOME/.config/nvim"    "nvim"    || rc=1
+    ensure_link "$REPO_ROOT/ghostty" "$HOME/.config/ghostty" "ghostty" || rc=1
+    # Ghostty has no leader, same as foot, so the Linux config (Herdr owns
+    # ctrl+a) fits. config.toml is the Windows one, built around WezTerm's leader.
+    ensure_link "$REPO_ROOT/herdr/config.linux.toml" "$HOME/.config/herdr/config.toml" "herdr" || rc=1
+    return $rc
 }
 
 do_unlink() {
@@ -88,7 +102,7 @@ do_unlink() {
 
     remove_link "$REPO_ROOT/nvim"    "$HOME/.config/nvim"    "nvim"
     remove_link "$REPO_ROOT/ghostty" "$HOME/.config/ghostty" "ghostty"
-    remove_link "$REPO_ROOT/herdr"   "$HOME/.config/herdr"   "herdr"
+    remove_link "$REPO_ROOT/herdr/config.linux.toml" "$HOME/.config/herdr/config.toml" "herdr"
 }
 
 do_doctor() {
@@ -99,13 +113,20 @@ do_doctor() {
     if has brew; then ok "brew present"; else fail "brew not found"; failures=$((failures+1)); fi
 
     step "commands on PATH"
-    for cmd in nvim git rg fd ghostty; do
+    for cmd in nvim git rg fd; do
         if has "$cmd"; then
             ok "$cmd -> $(command -v "$cmd")"
         else
             fail "$cmd not on PATH"; failures=$((failures+1))
         fi
     done
+
+    # The cask installs an app bundle; there is no ghostty command on PATH.
+    if [ -d /Applications/Ghostty.app ] || [ -d "$HOME/Applications/Ghostty.app" ]; then
+        ok "Ghostty.app installed"
+    else
+        fail "Ghostty.app not found"; failures=$((failures+1))
+    fi
 
     step "neovim version"
     if has nvim; then
@@ -114,14 +135,15 @@ do_doctor() {
     fi
 
     step "config links"
-    for pair in "nvim:$HOME/.config/nvim" "ghostty:$HOME/.config/ghostty" "herdr:$HOME/.config/herdr"; do
-        local label="${pair%%:*}" link="${pair#*:}"
+    for pair in "nvim:$HOME/.config/nvim:nvim" "ghostty:$HOME/.config/ghostty:ghostty"                 "herdr:$HOME/.config/herdr/config.toml:herdr/config.linux.toml"; do
+        local label="${pair%%:*}" rest="${pair#*:}"
+        local link="${rest%%:*}" expected="$REPO_ROOT/${rest#*:}"
         if [ -L "$link" ]; then
             local current; current="$(readlink "$link")"
-            if [ "$current" = "$REPO_ROOT/$label" ]; then
+            if [ "$current" = "$expected" ]; then
                 ok "$label -> $current"
             else
-                fail "$label -> $current (expected $REPO_ROOT/$label)"
+                fail "$label -> $current (expected $expected)"
                 failures=$((failures+1))
             fi
         elif [ -e "$link" ]; then
@@ -145,7 +167,8 @@ do_doctor() {
     else
         green "  all checks passed"
     fi
-    return "$failures"
+    # Exit codes wrap at 256; the count is already printed above.
+    [ "$failures" -eq 0 ]
 }
 
 do_init() {
@@ -154,11 +177,15 @@ do_init() {
 
     do_install
     do_link
-    do_doctor
-
-    echo
-    ok "Ready."
-    info "Run nvim once and let lazy.nvim and Mason finish."
+    if do_doctor; then
+        echo
+        ok "Ready."
+        info "Run nvim once and let lazy.nvim and Mason finish."
+    else
+        echo
+        warn "Setup finished with failures. See above."
+        return 1
+    fi
 }
 
 do_update() {

@@ -249,7 +249,7 @@ cd ~/dotfiles
 | --- | --- | --- |
 | Terminal | WezTerm, `wezterm/wezterm.lua` | Ghostty, `ghostty/config` |
 | Neovim | junction at `%LOCALAPPDATA%\nvim` | symlink at `~/.config/nvim` |
-| Herdr | `HERDR_CONFIG_PATH` → `herdr/config.toml` | symlink at `~/.config/herdr` |
+| Herdr | `HERDR_CONFIG_PATH` → `herdr/config.toml` | symlink `~/.config/herdr/config.toml` → `herdr/config.linux.toml` |
 | Packages | winget, `packages/winget.txt` | Homebrew, `packages/Brewfile` |
 | Bootstrap | `dot.ps1` | `dot-mac.sh` |
 
@@ -262,10 +262,11 @@ Notes:
 - **`macos-option-as-alt`** is on, so Option behaves like Alt in the terminal.
 - **No zig in the Brewfile.** Homebrew's neovim and tree-sitter handle
   compilation natively on macOS.
-- **Herdr links the whole directory** (`~/.config/herdr`), not just the config
-  file. The `default_shell` in `herdr/config.toml` is a Windows path; on macOS
-  Herdr falls back to `$SHELL` when it's empty or invalid, which is the right
-  behaviour. A Mac-specific `config.toml` may be needed if this causes issues.
+- **Herdr uses the Linux config.** Ghostty has no leader, same as foot, so
+  `config.linux.toml` (Herdr owns `ctrl+a`) fits; `config.toml` is built around
+  WezTerm's leader. Only the file is linked: `~/.config/herdr` also holds
+  Herdr's runtime state, which does not belong in the repo. `link` removes the
+  old whole-directory symlink if it finds one.
 
 ## The WezTerm Config
 
